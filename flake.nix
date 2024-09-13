@@ -13,11 +13,15 @@
       in {
         devShells.default = pkgs.mkShell {
           buildInputs = [ 
+            # Build deps
             pkgs.cargo
-            cpkgs.funzzy
+            pkgs.rustfmt
 
-            ## liconv
+            ## System deps
             pkgs.libiconv
+
+            ## Dev deps
+            cpkgs.funzzy
           ];
         };
     });

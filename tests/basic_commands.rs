@@ -16,9 +16,7 @@ fn cleanup() {
 fn it_list_the_packages_declared_in_the_config() -> Result<(), Box<dyn std::error::Error>> {
     let mut cmd = Command::cargo_bin("slot")?;
 
-    cmd.arg("-c")
-        .arg("examples/basic.toml")
-        .arg("list");
+    cmd.arg("-c").arg("examples/basic.toml").arg("list");
 
     cmd.assert()
         .success()
@@ -34,19 +32,24 @@ fn it_link_the_packages() -> Result<(), Box<dyn std::error::Error>> {
     cleanup();
     let mut cmd = Command::cargo_bin("slot")?;
 
-    cmd.arg("-c")
-        .arg("examples/basic.toml")
-        .arg("link");
+    cmd.arg("-c").arg("examples/basic.toml").arg("link");
 
     cmd.assert()
         .success()
         .stdout(predicate::str::contains("Linking packages"))
-        .stdout(predicate::str::contains("nvim: ./examples/target/nvim (new link)"))
-        .stdout(predicate::str::contains("zsh: ./examples/target/.zshrc (new link)"));
+        .stdout(predicate::str::contains(
+            "nvim: ./examples/target/nvim (new link)",
+        ))
+        .stdout(predicate::str::contains(
+            "zsh: ./examples/target/.zshrc (new link)",
+        ));
 
     let list_files_in_nvim = std::fs::read_dir("examples/target/nvim")?;
     let list_files_in_source_nvim = std::fs::read_dir("examples/source/nvim")?;
-    assert_eq!(list_files_in_nvim.count(), list_files_in_source_nvim.count());
+    assert_eq!(
+        list_files_in_nvim.count(),
+        list_files_in_source_nvim.count()
+    );
 
     let zsh_target_content = std::fs::read_to_string("examples/target/.zshrc")?;
     let zsh_source_content = std::fs::read_to_string("examples/source/zshrc")?;

@@ -1,10 +1,10 @@
-use std::collections::HashMap;
-use std::os::unix::fs::symlink;
-use std::fmt::{Display, Formatter};
-use std::path::PathBuf;
-use std::env;
 use clap::{Parser, Subcommand};
 use serde::Deserialize;
+use std::collections::HashMap;
+use std::env;
+use std::fmt::{Display, Formatter};
+use std::os::unix::fs::symlink;
+use std::path::PathBuf;
 
 /// Simple program to greet a person
 #[derive(Parser, Debug)]
@@ -39,7 +39,6 @@ enum Commands {
     /// List all packages in the configuration
     List,
 }
-
 
 // Configuration file format
 #[derive(Debug, Deserialize)]
@@ -79,13 +78,14 @@ fn main() {
                     Ok(_) => {
                         print!("{}", GREEN);
                         println!("  {}: {} (linked)", pkg_name, syslink.target)
-                    },
+                    }
                     Err(SlotError::NotFound(_)) => {
                         let src_path = path(&syslink.source);
                         match symlink(&src_path, &syslink.target) {
-                            Ok(_) => 
-                                println!("{}  {}: {} (new link)", GREEN, pkg_name, syslink.target),
-                            Err(err) => { 
+                            Ok(_) => {
+                                println!("{}  {}: {} (new link)", GREEN, pkg_name, syslink.target)
+                            }
+                            Err(err) => {
                                 println!("{}Package link failed: {}", RED, err)
                             }
                         }
@@ -98,7 +98,7 @@ fn main() {
                 };
                 print!("{}", RESET);
             }
-        },
+        }
         Commands::Unlink { packages } => {
             for (pkg_name, syslink) in config.packages.iter() {
                 if contain_package(&packages, &pkg_name) {
@@ -129,10 +129,10 @@ fn main() {
                 }
 
                 match check_package(&syslink) {
-                    Ok(_) => { 
+                    Ok(_) => {
                         print!("{}", GREEN);
                         println!("  {} {} (linked)", pkg_name, syslink.target);
-                    },
+                    }
                     Err(err) => {
                         print!("{}", RED);
                         println!("  {} {} (broken)", pkg_name, syslink.target);
@@ -183,27 +183,48 @@ fn check_package(package: &SysLink) -> Result<(), SlotError> {
 
     let sln_metadata = match std::fs::symlink_metadata(&sln_path) {
         Ok(metadata) => metadata,
-        Err(err) => return Err(SlotError::NotFound(format!("Failed to read metadata: {:?}", err)))
+        Err(err) => {
+            return Err(SlotError::NotFound(format!(
+                "Failed to read metadata: {:?}",
+                err
+            )))
+        }
     };
 
     if !sln_metadata.file_type().is_symlink() {
-        return Err(SlotError::NotSymlink(format!("Path is not a symlink: {}", &package.target)));
+        return Err(SlotError::NotSymlink(format!(
+            "Path is not a symlink: {}",
+            &package.target
+        )));
     }
 
     let target_path = std::fs::read_link(sln_path).expect("Failed to read link");
 
     if !target_path.exists() {
-        return Err(SlotError::NotFound(format!("Target path does not exist: {}", target_path.display())))
+        return Err(SlotError::NotFound(format!(
+            "Target path does not exist: {}",
+            target_path.display()
+        )));
     }
 
     // Get the metadata of the target (source) file following the symlink
     let target_metatada = match std::fs::metadata(&target_path) {
         Ok(metadata) => metadata,
-        Err(err) => return Err(SlotError::Unhandled(format!("Failed to read target metadata: {}", err))),
+        Err(err) => {
+            return Err(SlotError::Unhandled(format!(
+                "Failed to read target metadata: {}",
+                err
+            )))
+        }
     };
     let src_metadata = match std::fs::metadata(src_path) {
         Ok(metadata) => metadata,
-        Err(err) => return Err(SlotError::Unhandled(format!("Failed to read source metadata: {}", err))),
+        Err(err) => {
+            return Err(SlotError::Unhandled(format!(
+                "Failed to read source metadata: {}",
+                err
+            )))
+        }
     };
 
     // Compare inode and device numbers to check if they point to the same file
@@ -211,7 +232,10 @@ fn check_package(package: &SysLink) -> Result<(), SlotError> {
         return Ok(());
     }
 
-    Err(SlotError::LinkMismatch(format!("Package link mismatch between target '{}' and source '{}'", package.target, package.source)))
+    Err(SlotError::LinkMismatch(format!(
+        "Package link mismatch between target '{}' and source '{}'",
+        package.target, package.source
+    )))
 }
 
 fn path(path: &str) -> String {
@@ -220,7 +244,9 @@ fn path(path: &str) -> String {
     }
 
     if path.contains("$") {
-        return shellexpand::env(path).expect("Failed to expand environment variables").into_owned();
+        return shellexpand::env(path)
+            .expect("Failed to expand environment variables")
+            .into_owned();
     }
 
     let pathbuf = PathBuf::from(path);
@@ -228,7 +254,9 @@ fn path(path: &str) -> String {
     let absolute_path = if pathbuf.is_absolute() {
         pathbuf.to_path_buf()
     } else {
-        env::current_dir().expect("Failed to get current directory").join(pathbuf)
+        env::current_dir()
+            .expect("Failed to get current directory")
+            .join(pathbuf)
     };
 
     absolute_path.to_string_lossy().to_string()
