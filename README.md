@@ -7,6 +7,30 @@
 Because gnu stow almost does what I want, but not quite. I wanted a simpler tool that could manage symlinks for multiple packages with a single configuration file.
 I need to be able to toogle links on demand to apply different configs.
 
+## Demo
+
+Create the `slot.toml` in the current directory
+```toml
+[packages]
+nvim = { source = "./examples/source/nvim", target = "./examples/target/nvim" }
+zsh = { source = "./examples/source/zshrc", target = "./examples/target/.zshrc" }
+```
+And run
+```bash
+slot link
+Linking packages
+  nvim: ./examples/target/nvim (new link)
+  zsh: ./examples/target/.zshrc (new link)
+
+ls -la examples/target                                                                                                                                                     [1:00:35]
+total 0
+drwxr-xr-x 4 cris 128 Sep 14 01:00 .
+drwxr-xr-x 5 cris 160 Sep 14 01:00 ..
+lrwxr-xr-x 1 cris  58 Sep 14 01:00 .zshrc -> /Users/cristianoliveira/other/slot/./examples/source/zshrc
+lrwxr-xr-x 1 cris  57 Sep 14 01:00 nvim -> /Users/cristianoliveira/other/slot/./examples/source/nvim
+cr
+```
+
 ## Features
 
 - Declarative symlink management with a simple TOML configuration file.
