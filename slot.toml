@@ -1,0 +1,15 @@
+[[nvim]]
+source = "~/.dotfiles/nvim"
+target = "~/.config/nvim"
+
+[[ctags]]
+source = "~/.dotfiles/ctags"
+target = "~/.ctags"
+
+[[tmux]]
+source = "~/.dotfiles/tmux/tmux.conf"
+target = "~/.tmux.conf"
+
+[[zsh]]
+source = "~/.dotfiles/zsh/zshrc"
+target = "~/.zshrc"
