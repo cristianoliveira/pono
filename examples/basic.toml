@@ -1,0 +1,3 @@
+[packages]
+nvim = { source = "./examples/source/nvim", target = "./examples/target/nvim" }
+zsh = { source = "./examples/source/zshrc", target = "./examples/target/.zshrc" }

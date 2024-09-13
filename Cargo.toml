@@ -16,3 +16,7 @@ clap = { version = "4.5.17", features = ["derive"] }
 serde = { version = "1.0.210", features = ["derive"] }
 shellexpand = "3.1.0"
 toml = "0.8.19"
+
+[dev-dependencies]
+assert_cmd = "2.0.14"
+predicates = "3.1.0"

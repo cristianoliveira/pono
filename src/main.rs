@@ -1,6 +1,8 @@
 use std::collections::HashMap;
 use std::os::unix::fs::symlink;
 use std::fmt::{Display, Formatter};
+use std::path::PathBuf;
+use std::env;
 use clap::{Parser, Subcommand};
 use serde::Deserialize;
 
@@ -58,7 +60,8 @@ const RESET: &str = "\x1b[0m";
 fn main() {
     let args = Args::parse();
     let config = args.config.unwrap_or("slot.toml".to_string());
-    let toml_str = std::fs::read_to_string(&config)
+    let config_path = path(&config);
+    let toml_str = std::fs::read_to_string(&config_path)
         .expect(format!("Failed to read configuration file: {}", config).as_str());
 
     let config: Configuration = toml::from_str(&toml_str)
@@ -66,6 +69,7 @@ fn main() {
 
     match args.command.unwrap() {
         Commands::Link { packages } => {
+            println!("Linking packages");
             for (pkg_name, syslink) in config.packages.iter() {
                 if contain_package(&packages, &pkg_name) {
                     continue;
@@ -74,12 +78,13 @@ fn main() {
                 match check_package(&syslink) {
                     Ok(_) => {
                         print!("{}", GREEN);
-                        println!("  {} {} (linked)", pkg_name, syslink.target)
+                        println!("  {}: {} (linked)", pkg_name, syslink.target)
                     },
                     Err(SlotError::NotFound(_)) => {
                         let src_path = path(&syslink.source);
                         match symlink(&src_path, &syslink.target) {
-                            Ok(_) => println!("{}Linked package: {}", GREEN, pkg_name),
+                            Ok(_) => 
+                                println!("{}  {}: {} (new link)", GREEN, pkg_name, syslink.target),
                             Err(err) => { 
                                 println!("{}Package link failed: {}", RED, err)
                             }
@@ -218,5 +223,13 @@ fn path(path: &str) -> String {
         return shellexpand::env(path).expect("Failed to expand environment variables").into_owned();
     }
 
-    path.to_string()
+    let pathbuf = PathBuf::from(path);
+
+    let absolute_path = if pathbuf.is_absolute() {
+        pathbuf.to_path_buf()
+    } else {
+        env::current_dir().expect("Failed to get current directory").join(pathbuf)
+    };
+
+    absolute_path.to_string_lossy().to_string()
 }

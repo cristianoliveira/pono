@@ -1,3 +1,2 @@
 [packages]
-nvim = { source = "~/.dotfiles/nvim", target = "./examples/target/nvim" }
-zsh = { source = "./examples/source/zshrc", target = "./examples/target/.zshrc" }
+basic = { source = "./examples/basic.toml", target = "./tests/basic.toml" }
