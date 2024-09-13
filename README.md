@@ -25,8 +25,8 @@ ls -la examples/target                                                          
 total 0
 drwxr-xr-x 4 cris 128 Sep 14 01:00 .
 drwxr-xr-x 5 cris 160 Sep 14 01:00 ..
-lrwxr-xr-x 1 cris  58 Sep 14 01:00 .zshrc -> /Users/cristianoliveira/other/slot/./examples/source/zshrc
-lrwxr-xr-x 1 cris  57 Sep 14 01:00 nvim -> /Users/cristianoliveira/other/slot/./examples/source/nvim
+lrwxr-xr-x 1 cris  58 Sep 14 01:00 .zshrc -> /home/cris/slot/./examples/source/zshrc
+lrwxr-xr-x 1 cris  57 Sep 14 01:00 nvim -> /home/cris/slot/./examples/source/nvim
 cr
 ```
 
