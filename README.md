@@ -4,8 +4,7 @@
 
 ## Why?
 
-Because gnu stow almost does what I want, but not quite. I wanted a simpler tool that could manage symlinks for multiple packages with a single configuration file.
-I need to be able to toogle links on demand to apply different configs.
+Because [GNU stow](https://www.gnu.org/software/stow/) does almost what I wanted, but not quite. I wanted a simpler tool that could manage symlinks for multiple packages independent of the source file structure, using a flat configuration. I also need to be able to toogle links on demand to apply different configs.
 
 ## Demo
 
