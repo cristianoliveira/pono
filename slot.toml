@@ -1,15 +1,3 @@
-[[nvim]]
-source = "~/.dotfiles/nvim"
-target = "~/.config/nvim"
-
-[[ctags]]
-source = "~/.dotfiles/ctags"
-target = "~/.ctags"
-
-[[tmux]]
-source = "~/.dotfiles/tmux/tmux.conf"
-target = "~/.tmux.conf"
-
-[[zsh]]
-source = "~/.dotfiles/zsh/zshrc"
-target = "~/.zshrc"
+[packages]
+nvim = { source = "~/.dotfiles/nvim", target = "./examples/target/nvim" }
+zsh = { source = "./examples/source/zshrc", target = "./examples/target/.zshrc" }

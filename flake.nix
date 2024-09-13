@@ -15,6 +15,9 @@
           buildInputs = [ 
             pkgs.cargo
             cpkgs.funzzy
+
+            ## liconv
+            pkgs.libiconv
           ];
         };
     });
