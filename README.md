@@ -1,11 +1,11 @@
 # slot - Symbolic Link Organizer with TOML
 
-"**slot**", it is a lightweight command-line tool for managing symbolic links in your filesystem inspired by `stow`. 
+**slot** is a lightweight command-line tool for managing symbolic links in your filesystem inspired by `stow`. 
 
 ## Why?
 
-Because `stow` almost does what I want, but not quite. I wanted a simpler tool that could manage symlinks for multiple packages with a single configuration file.
-I need to be able to replace the links on demand to configure some packages in a different way.
+Because gnu stow almost does what I want, but not quite. I wanted a simpler tool that could manage symlinks for multiple packages with a single configuration file.
+I need to be able to toogle links on demand to apply different configs.
 
 ## Features
 
@@ -117,19 +117,17 @@ The configuration is defined in a `slot.toml` file. It specifies the source dire
 ### Example `slot.toml`:
 
 ```toml
-[packages]
+[packages.package1]
+source = "path/to/package1"
+target = "/usr/local/bin"
 
-  [packages.package1]
-  source = "path/to/package1"
-  target = "/usr/local/bin"
+[packages.package2]
+source = "path/to/package2"
+target = "/home/user/.config"
 
-  [packages.package2]
-  source = "path/to/package2"
-  target = "/home/user/.config"
-
-  [packages.package3]
-  source = "path/to/package3"
-  target = "/opt/tools"
+[packages.package3]
+source = "path/to/package3"
+target = "/opt/tools"
 ```
 
 ### Fields:
