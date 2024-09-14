@@ -11,7 +11,7 @@ fn it_fails_when_config_file_doesnt_exist() -> Result<(), Box<dyn std::error::Er
         .failure()
         .stdout(predicate::str::contains("Failed to read the examples/configs/unknown.toml file"))
         .stdout(predicate::str::contains("Reason: No such file or directory"))
-        .stdout(predicate::str::contains("Fix:"));
+        .stdout(predicate::str::contains("Debugging:"));
 
     Ok(())
 }

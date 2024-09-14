@@ -65,7 +65,8 @@ fn main() {
         Err(err) => {
             println!("Failed to read the {} file", config);
             println!("Reason: {}", err);
-            println!("Fix: Provide a valid slot config file with at least one package");
+            println!("Debugging:");
+            println!(" - Check if file exists and is accessible (using ls -la)");
             std::process::exit(1);
         }
     };
