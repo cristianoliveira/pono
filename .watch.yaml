@@ -1,0 +1,29 @@
+## Funzzy events file
+# more details see: https://github.com/cristianoliveira/funzzy
+#
+# list here all the events and the commands that it should execute
+
+- name: quick checks
+  run: 
+    - cargo test
+  change: 
+    - src/**
+    - tests/**
+
+- name: lint & formatters
+  run: 
+    - cargo fmt
+  change: 
+    - src/**
+    - tests/**
+
+- name: stage files in git
+  run: 
+    - git add {{relative_path}}
+    - git add -p
+  change: 
+    - Cargo.toml
+    - "*.md"
+    - src/**
+    - tests/**
+    - "*.nix"
