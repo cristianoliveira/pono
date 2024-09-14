@@ -1,5 +1,4 @@
-[foobar]
-foo = 1
-## Correct format
-# [packages]
+[packages]
+foo = { path = "foo" }
+# Correct format
 # foo = { source = "./foo", target = "~/.config/foo" }

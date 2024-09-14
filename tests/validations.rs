@@ -39,3 +39,21 @@ fn it_fails_when_config_lacks_packages() -> Result<(), Box<dyn std::error::Error
 
     Ok(())
 }
+
+#[test]
+fn it_fails_when_contains_invalid_package() -> Result<(), Box<dyn std::error::Error>> {
+    let slot_config = "examples/configs/invalid-package.toml";
+    let mut cmd = Command::cargo_bin("slot")?;
+
+    cmd.arg("-c").arg(slot_config).arg("list");
+
+    cmd.assert()
+        .failure()
+        .stdout(predicate::str::contains("Invalid slot configuration file"))
+        .stdout(predicate::str::contains(
+            "Reason: TOML parse error at line 2, column 7",
+        ))
+        .stdout(predicate::str::contains("Debugging:"));
+
+    Ok(())
+}
