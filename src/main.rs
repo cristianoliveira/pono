@@ -71,8 +71,23 @@ fn main() {
         }
     };
 
-    let config: Configuration = toml::from_str(&toml_content)
-        .expect(format!("Failed to parse configuration file: {}", config).as_str());
+    let maybe_config: Option<Configuration> = match toml::from_str(&toml_content) {
+        Ok(config) => Some(config),
+        Err(err) => {
+            println!("Invalid slot configuration file");
+            println!("Reason: {}", err);
+            println!("Debugging:");
+            println!(" - Check if the file is a valid TOML file");
+            println!(" - Check if the file has the correct format");
+            None
+        }
+    };
+
+    if maybe_config.is_none() {
+        std::process::exit(1);
+    }
+
+    let config = maybe_config.unwrap();
 
     match args.command.unwrap() {
         Commands::Link { packages } => {
@@ -82,7 +97,10 @@ fn main() {
                     continue;
                 }
 
-                println!("{}  {} -> {} (linking)", pkg_name, syslink.source, syslink.target);
+                println!(
+                    "{}  {} -> {} (linking)",
+                    pkg_name, syslink.source, syslink.target
+                );
                 match check_package(&syslink) {
                     Ok(_) => {
                         print!("{}", GREEN);
