@@ -74,6 +74,7 @@ fn main() {
                     continue;
                 }
 
+                println!("{}  {} -> {} (linking)", pkg_name, syslink.source, syslink.target);
                 match check_package(&syslink) {
                     Ok(_) => {
                         print!("{}", GREEN);
@@ -86,7 +87,7 @@ fn main() {
                                 println!("{}  {}: {} (new link)", GREEN, pkg_name, syslink.target)
                             }
                             Err(err) => {
-                                println!("{}Package link failed: {}", RED, err)
+                                println!("{}Package link failed reason: {}", RED, err)
                             }
                         }
                     }
