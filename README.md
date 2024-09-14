@@ -13,22 +13,22 @@ Because [GNU stow](https://www.gnu.org/software/stow/) does almost what I wanted
 Create the `slot.toml` in the current directory
 ```toml
 [packages]
-nvim = { source = "./examples/source/nvim", target = "./examples/target/nvim" }
-zsh = { source = "./examples/source/zshrc", target = "./examples/target/.zshrc" }
+nvim = { source = "./examples/from/nvim", target = "./examples/to/nvim" }
+zsh = { source = "./examples/from/zshrc", target = "./examples/to/.zshrc" }
 ```
 And run
 ```bash
-slot link
+slot link -c example/slot.toml
 Linking packages
-  nvim: ./examples/target/nvim (new link)
-  zsh: ./examples/target/.zshrc (new link)
+  nvim: ./examples/to/nvim (new link)
+  zsh: ./examples/to/.zshrc (new link)
 
-ls -la examples/target                                                                                                                                                     [1:00:35]
+ls -la examples/to                                                                                                                                                     [1:00:35]
 total 0
 drwxr-xr-x 4 cris 128 Sep 14 01:00 .
 drwxr-xr-x 5 cris 160 Sep 14 01:00 ..
-lrwxr-xr-x 1 cris  58 Sep 14 01:00 .zshrc -> /home/cris/slot/./examples/source/zshrc
-lrwxr-xr-x 1 cris  57 Sep 14 01:00 nvim -> /home/cris/slot/./examples/source/nvim
+lrwxr-xr-x 1 cris  58 Sep 14 01:00 .zshrc -> /home/cris/slot/./examples/src/zshrc
+lrwxr-xr-x 1 cris  57 Sep 14 01:00 nvim -> /home/cris/slot/./examples/src/nvim
 cr
 ```
 
