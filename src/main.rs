@@ -6,7 +6,7 @@ use std::fmt::{Display, Formatter};
 use std::os::unix::fs::symlink;
 use std::path::PathBuf;
 
-/// Simple program to greet a person
+/// Slot is a simple tool to manage symbolic links with toml
 #[derive(Parser, Debug)]
 #[command(version, about, long_about = None, arg_required_else_help(true))]
 struct Args {
