@@ -1,6 +1,6 @@
 # slot - Symbolic Link Organizer with TOML
 
-[![CI quick checks](https://github.com/cristianoliveira/slot/actions/workflows/on-push.yml/badge.svg)](https://github.com/cristianoliveira/slot/actions/workflows/on-push.yml)
+[![CI checks](https://github.com/cristianoliveira/slot/actions/workflows/on-push.yml/badge.svg)](https://github.com/cristianoliveira/slot/actions/workflows/on-push.yml)
 
 **slot** is a lightweight command-line tool for managing symbolic links in your filesystem inspired by `stow`. 
 
