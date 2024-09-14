@@ -1,0 +1,22 @@
+- VALIDATE configuration file (toml):
+  - if format is valid
+  - if required fields are present (packages)
+  - if packages are valid
+
+-- VALIDATE packages:
+  - are not duplicated. What to do them? (ignore, error, warning)
+
+-- VALIDATE source file: 
+  - if exists
+  - if is a file
+  - if is readable
+
+-- VALIDATE destination file:
+  - if exists
+  - if is a file
+  - if is writable
+
+
+- GENERATE: config file by scanning a directory and creating a package for each file
+
+- GENERATE: config file with default values

@@ -60,10 +60,17 @@ fn main() {
     let args = Args::parse();
     let config = args.config.unwrap_or("slot.toml".to_string());
     let config_path = path(&config);
-    let toml_str = std::fs::read_to_string(&config_path)
-        .expect(format!("Failed to read configuration file: {}", config).as_str());
+    let toml_content = match std::fs::read_to_string(&config_path) {
+        Ok(content) => content,
+        Err(err) => {
+            println!("Failed to read the {} file", config);
+            println!("Reason: {}", err);
+            println!("Fix: Provide a valid slot config file with at least one package");
+            std::process::exit(1);
+        }
+    };
 
-    let config: Configuration = toml::from_str(&toml_str)
+    let config: Configuration = toml::from_str(&toml_content)
         .expect(format!("Failed to parse configuration file: {}", config).as_str());
 
     match args.command.unwrap() {
