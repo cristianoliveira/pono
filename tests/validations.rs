@@ -57,3 +57,18 @@ fn it_fails_when_contains_invalid_package() -> Result<(), Box<dyn std::error::Er
 
     Ok(())
 }
+
+// #[test]
+fn it_fails_when_target_exist_and_isnt_a_symbolic_link() -> Result<(), Box<dyn std::error::Error>> {
+    let slot_config = "examples/configs/invalid-target-is-not-link.toml";
+    let mut cmd = Command::cargo_bin("slot")?;
+
+    cmd.arg("-c").arg(slot_config).arg("link").arg("notlink");
+
+    cmd.assert()
+        .failure()
+        .stdout(predicate::str::contains("Reason: (non-syslink)"))
+        .stdout(predicate::str::contains("Debugging:"));
+
+    Ok(())
+}

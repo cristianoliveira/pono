@@ -91,11 +91,10 @@ fn main() {
 
     match args.command.unwrap() {
         Commands::Link { packages } => {
+            // Commands with side effects
             println!("Linking packages");
-            for (pkg_name, syslink) in config.packages.iter() {
-                if contain_package(&packages, &pkg_name) {
-                    continue;
-                }
+            for pkg_name in packages_to_manipulate(&config, &packages) {
+                let syslink = config.packages.get(&pkg_name).unwrap();
 
                 println!(
                     "{}  {} -> {} (linking)",
@@ -127,10 +126,8 @@ fn main() {
             }
         }
         Commands::Unlink { packages } => {
-            for (pkg_name, syslink) in config.packages.iter() {
-                if contain_package(&packages, &pkg_name) {
-                    continue;
-                }
+            for pkg_name in packages_to_manipulate(&config, &packages) {
+                let syslink = config.packages.get(&pkg_name).unwrap();
                 match std::fs::remove_file(&syslink.target) {
                     Ok(_) => println!("Unlinked package: {}", pkg_name),
                     Err(err) => {
@@ -141,19 +138,13 @@ fn main() {
                 }
             }
         }
-        Commands::List => {
-            println!("Packages:");
-            for (package, syslink) in config.packages.iter() {
-                println!("  {}: {}", package, syslink.source);
-            }
-        }
+
+        // Commands without side effects
         Commands::Status { packages } => {
             println!("Status:");
             let mut has_error = false;
-            for (pkg_name, syslink) in config.packages.iter() {
-                if contain_package(&packages, &pkg_name) {
-                    continue;
-                }
+            for pkg_name in packages_to_manipulate(&config, &packages) {
+                let syslink = config.packages.get(&pkg_name).unwrap();
 
                 match check_package(&syslink) {
                     Ok(_) => {
@@ -174,17 +165,13 @@ fn main() {
                 std::process::exit(1);
             }
         }
-    }
-}
-
-fn contain_package(packages: &Option<Vec<String>>, package: &str) -> bool {
-    if let Some(ref pckgs) = packages {
-        if pckgs.contains(&package.to_string()) {
-            return true;
+        Commands::List => {
+            println!("Packages:");
+            for (package, syslink) in config.packages.iter() {
+                println!("  {}: {}", package, syslink.source);
+            }
         }
     }
-
-    false
 }
 
 enum SlotError {
@@ -196,10 +183,10 @@ enum SlotError {
 impl Display for SlotError {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         match self {
-            SlotError::NotFound(msg) => write!(f, "Not found: {}", msg),
-            SlotError::NotSymlink(msg) => write!(f, "Not a symlink: {}", msg),
-            SlotError::LinkMismatch(msg) => write!(f, "Link mismatch: {}", msg),
-            SlotError::Unhandled(msg) => write!(f, "Unhandled error: {}", msg),
+            SlotError::NotFound(msg) => write!(f, "(not-found) {}", msg),
+            SlotError::NotSymlink(msg) => write!(f, "(non-syslink) {}", msg),
+            SlotError::LinkMismatch(msg) => write!(f, "(link-mismatch) {}", msg),
+            SlotError::Unhandled(msg) => write!(f, "{}", msg),
         }
     }
 }
@@ -219,9 +206,17 @@ fn check_package(package: &SysLink) -> Result<(), SlotError> {
     };
 
     if !sln_metadata.file_type().is_symlink() {
+        let type_str = if sln_metadata.is_dir() {
+            "directory"
+        } else if sln_metadata.is_file() {
+            "file"
+        } else {
+            "unknown"
+        };
+
         return Err(SlotError::NotSymlink(format!(
-            "Path is not a symlink: {}",
-            &package.target
+            "Target path '{}' points to a {}.",
+            &package.target, type_str
         )));
     }
 
@@ -287,4 +282,27 @@ fn path(path: &str) -> String {
     };
 
     absolute_path.to_string_lossy().to_string()
+}
+
+fn packages_to_manipulate(config: &Configuration, packages: &Option<Vec<String>>) -> Vec<String> {
+    config
+        .packages
+        .keys()
+        .filter(|p| contain_package(packages, p))
+        .map(|s| s.to_string())
+        .collect()
+}
+
+fn contain_package(packages: &Option<Vec<String>>, package: &str) -> bool {
+    if packages.is_none() {
+        return true;
+    }
+
+    if let Some(ref pckgs) = packages {
+        if pckgs.contains(&package.to_string()) {
+            return true;
+        }
+    }
+
+    false
 }

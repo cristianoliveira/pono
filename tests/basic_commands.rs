@@ -4,8 +4,10 @@ use predicates::prelude::predicate;
 fn cleanup() {
     let current_dir = std::env::current_dir().unwrap();
     let examples_dir = current_dir.join("examples/to");
-    let paths = std::fs::read_dir(&examples_dir)
-        .expect(&format!("Failed to read directory {:?}", examples_dir));
+    let paths = std::fs::read_dir(&examples_dir).expect(&format!(
+        "CLEANUP: Failed to read directory {:?}",
+        examples_dir
+    ));
 
     for path in paths.into_iter() {
         let path = path.unwrap().path();
@@ -59,6 +61,17 @@ fn it_link_the_packages() -> Result<(), Box<dyn std::error::Error>> {
     let zsh_target_content = std::fs::read_to_string("examples/to/.zshrc")?;
     let zsh_source_content = std::fs::read_to_string("examples/from/zshrc")?;
     assert_eq!(zsh_target_content, zsh_source_content);
+
+    cmd = Command::cargo_bin("slot")?;
+    cmd.arg("-c")
+        .arg("examples/basic.toml")
+        .arg("status")
+        .arg("nvim");
+
+    cmd.assert()
+        .success()
+        .stdout(predicate::str::contains("nvim ./examples/to/nvim (linked)"))
+        .stdout(predicate::str::contains("zsh ./examples/to/.zshrc (linked)").count(0));
 
     cleanup();
     Ok(())

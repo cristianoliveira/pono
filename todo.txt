@@ -3,6 +3,9 @@
   - if required fields are present (packages)
   - if packages are valid
 
+-- VALIDATE: atomicity
+  - if all packages are valid perform the link/unlink operation
+
 -- VALIDATE packages:
   - are not duplicated. What to do them? (ignore, error, warning)
 
@@ -20,3 +23,17 @@
 - GENERATE: config file by scanning a directory and creating a package for each file
 
 - GENERATE: config file with default values
+
+- CROSS-SYSTEM:
+  example of a symlink creation function that works on both unix and windows
+  ```rust
+    fn create_symlink(source: &Path, target: &Path) -> io::Result<()> {
+      #[cfg(target_family = "unix")]
+      std::os::unix::fs::symlink(source, target)?;
+
+      #[cfg(target_family = "windows")]
+      std::os::windows::fs::symlink_file(source, target)?;
+
+      Ok(())
+  }
+  ```

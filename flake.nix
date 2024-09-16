@@ -11,6 +11,8 @@
         pkgs = import nixpkgs { inherit system; };
         cpkgs = import copkgs { inherit pkgs; };
       in {
+        packages = import ./packages.nix { inherit pkgs system; };
+
         devShells.default = pkgs.mkShell {
           buildInputs = [ 
             # Build deps

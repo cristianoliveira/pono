@@ -7,6 +7,7 @@
   run: 
     - cargo test
   change: 
+    - Cargo.toml
     - src/**
     - tests/**
 
@@ -14,8 +15,20 @@
   run: 
     - cargo fmt
   change: 
+    - Cargo.toml
     - src/**
     - tests/**
+
+- name: nix flake 
+  run: 
+    - nix build .#slot
+    - nix build .#slotNigthly
+  change: 
+    - Cargo.toml
+    - src/**
+    - tests/**
+    - "*.nix"
+  run_on_init: true
 
 - name: stage files in git
   run: 
