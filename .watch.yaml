@@ -21,7 +21,7 @@
 
 - name: nix flake 
   run: 
-    - nix build .#pono
+    # - nix build .#pono
     - nix build .#ponoNigthly
   change: 
     - Cargo.toml
