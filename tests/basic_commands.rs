@@ -73,6 +73,16 @@ fn it_link_the_packages() -> Result<(), Box<dyn std::error::Error>> {
         .stdout(predicate::str::contains("nvim ./examples/to/nvim (linked)"))
         .stdout(predicate::str::contains("zsh ./examples/to/.zshrc (linked)").count(0));
 
+    cmd = Command::cargo_bin("slot")?;
+    cmd.arg("-c")
+        .arg("examples/basic.toml")
+        .arg("unlink")
+        .arg("nvim");
+
+    cmd.assert()
+        .success()
+        .stdout(predicate::str::contains("Unlinked package: nvim"));
+
     cleanup();
     Ok(())
 }

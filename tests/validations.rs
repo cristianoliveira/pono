@@ -58,7 +58,7 @@ fn it_fails_when_contains_invalid_package() -> Result<(), Box<dyn std::error::Er
     Ok(())
 }
 
-// #[test]
+#[test]
 fn it_fails_when_target_exist_and_isnt_a_symbolic_link() -> Result<(), Box<dyn std::error::Error>> {
     let slot_config = "examples/configs/invalid-target-is-not-link.toml";
     let mut cmd = Command::cargo_bin("slot")?;
@@ -67,8 +67,25 @@ fn it_fails_when_target_exist_and_isnt_a_symbolic_link() -> Result<(), Box<dyn s
 
     cmd.assert()
         .failure()
-        .stdout(predicate::str::contains("Reason: (non-syslink)"))
-        .stdout(predicate::str::contains("Debugging:"));
+        .stdout(predicate::str::contains("Reason: (not-available)"))
+        .stdout(predicate::str::contains(
+            "Target path 'examples/to/.gitkeep' already exists and is a file.",
+        ));
+
+    Ok(())
+}
+
+#[test]
+fn it_fails_when_source_is_missing() -> Result<(), Box<dyn std::error::Error>> {
+    let slot_config = "examples/configs/invalid-target-is-not-link.toml";
+    let mut cmd = Command::cargo_bin("slot")?;
+
+    cmd.arg("-c").arg(slot_config).arg("link").arg("doesnexist");
+
+    cmd.assert()
+        .failure()
+        .stdout(predicate::str::contains("Reason: (not-found)"))
+        .stdout(predicate::str::contains("Package source does not exist"));
 
     Ok(())
 }

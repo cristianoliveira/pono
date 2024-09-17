@@ -12,7 +12,7 @@ use std::path::PathBuf;
 struct Args {
     /// Commands available
     #[command(subcommand)]
-    command: Option<Commands>,
+    command: Commands,
 
     /// Optional config file path (default: slot.toml)
     #[clap(short, long)]
@@ -89,7 +89,36 @@ fn main() {
 
     let config = maybe_config.unwrap();
 
-    match args.command.unwrap() {
+    // Validate all packages before performing any action (link, unlink)
+    match &args.command {
+        Commands::Link { packages } | Commands::Unlink { packages } => {
+            for pkg_name in packages_to_manipulate(&config, &packages) {
+                let syslink = config.packages.get(&pkg_name).unwrap();
+                match validate_package(&syslink) {
+                    Ok(_) => (),
+                    Err(SlotError::TargetAlreadyExists(err)) => {
+                        if let Commands::Link { .. } = args.command {
+                            print!("{}", RED);
+                            println!("Invalid package: {}", pkg_name);
+                            println!("Reason: {}", err);
+                            print!("{}", RESET);
+                            std::process::exit(1);
+                        }
+                    }
+                    Err(err) => {
+                        print!("{}", RED);
+                        println!("Invalid package: {}", pkg_name);
+                        println!("Reason: {}", err);
+                        print!("{}", RESET);
+                        std::process::exit(1);
+                    }
+                }
+            }
+        }
+        _ => (),
+    }
+
+    match args.command {
         Commands::Link { packages } => {
             // Commands with side effects
             println!("Linking packages");
@@ -100,26 +129,15 @@ fn main() {
                     "{}  {} -> {} (linking)",
                     pkg_name, syslink.source, syslink.target
                 );
-                match check_package(&syslink) {
+                let src_path = path(&syslink.source);
+
+                match symlink(&src_path, &syslink.target) {
                     Ok(_) => {
-                        print!("{}", GREEN);
-                        println!("  {}: {} (linked)", pkg_name, syslink.target)
-                    }
-                    Err(SlotError::NotFound(_)) => {
-                        let src_path = path(&syslink.source);
-                        match symlink(&src_path, &syslink.target) {
-                            Ok(_) => {
-                                println!("{}  {}: {} (new link)", GREEN, pkg_name, syslink.target)
-                            }
-                            Err(err) => {
-                                println!("{}Package link failed reason: {}", RED, err)
-                            }
-                        }
+                        println!("{}  {}: {} (new link)", GREEN, pkg_name, syslink.target)
                     }
                     Err(err) => {
-                        print!("{}", RED);
-                        println!("  {} {} (broken)", pkg_name, syslink.target);
-                        println!("  Reason: {}", err);
+                        println!("{}Package link failed reason: {}", RED, err);
+                        std::process::exit(1);
                     }
                 };
                 print!("{}", RESET);
@@ -134,6 +152,7 @@ fn main() {
                         print!("{}", RED);
                         println!("Failed to unlink package: {}", err);
                         print!("{}", RESET);
+                        std::process::exit(1);
                     }
                 }
             }
@@ -177,6 +196,7 @@ fn main() {
 enum SlotError {
     NotFound(String),
     NotSymlink(String),
+    TargetAlreadyExists(String),
     LinkMismatch(String),
     Unhandled(String),
 }
@@ -186,9 +206,56 @@ impl Display for SlotError {
             SlotError::NotFound(msg) => write!(f, "(not-found) {}", msg),
             SlotError::NotSymlink(msg) => write!(f, "(non-syslink) {}", msg),
             SlotError::LinkMismatch(msg) => write!(f, "(link-mismatch) {}", msg),
+            SlotError::TargetAlreadyExists(msg) => write!(f, "(not-available) {}", msg),
             SlotError::Unhandled(msg) => write!(f, "{}", msg),
         }
     }
+}
+
+fn validate_package(package: &SysLink) -> Result<(), SlotError> {
+    let sln_path = path(&package.target);
+    let src_path = path(&package.source);
+
+    // check if source exists
+    if !std::path::Path::new(&src_path).exists() {
+        return Err(SlotError::NotFound(format!(
+            "Package source does not exist: {} ",
+            src_path
+        )));
+    }
+
+    if std::path::Path::new(&sln_path).exists() {
+        let sln_metadata = match std::fs::symlink_metadata(&sln_path) {
+            Ok(metadata) => metadata,
+            Err(err) => {
+                return Err(SlotError::Unhandled(format!(
+                    "Target isn't accessible: {:?}",
+                    err
+                )))
+            }
+        };
+
+        if !sln_metadata.file_type().is_symlink() {
+            let type_str = if sln_metadata.is_dir() {
+                "directory"
+            } else if sln_metadata.is_file() {
+                "file"
+            } else {
+                "unknown"
+            };
+
+            return Err(SlotError::TargetAlreadyExists(format!(
+                "(not-available) Target path '{}' already exists and is a {}.",
+                &package.target, type_str
+            )));
+        }
+        return Err(SlotError::TargetAlreadyExists(format!(
+            "(not-avaiable) Package target already exists: {}",
+            src_path
+        )));
+    }
+
+    Ok(())
 }
 
 fn check_package(package: &SysLink) -> Result<(), SlotError> {
@@ -215,7 +282,7 @@ fn check_package(package: &SysLink) -> Result<(), SlotError> {
         };
 
         return Err(SlotError::NotSymlink(format!(
-            "Target path '{}' points to a {}.",
+            "Target path '{}' already exists and is a {}.",
             &package.target, type_str
         )));
     }
