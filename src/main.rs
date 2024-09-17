@@ -21,14 +21,14 @@ struct Args {
 
 #[derive(Subcommand, Debug)]
 enum Commands {
-    /// Link all or a space-separated list of ponos
-    Link {
-        /// Optional list of ponos to link (default: all)
+    /// Enables all or a space-separated list of ponos
+    Enable {
+        /// Optional list of ponos to enable (default: all)
         ponos: Option<Vec<String>>,
     },
-    /// Remove the link of all or a space-separated list of ponos
-    Unlink {
-        /// Optional list of ponos to link (default: all)
+    /// Disable all or a space-separated list of ponos
+    Disable {
+        /// Optional list of ponos to disable (default: all)
         ponos: Option<Vec<String>>,
     },
     /// Display the status of all ponos
@@ -43,11 +43,11 @@ enum Commands {
 // Configuration file format
 #[derive(Debug, Deserialize)]
 struct Configuration {
-    ponos: HashMap<String, SysLink>,
+    ponos: HashMap<String, PonoDefinition>,
 }
 
 #[derive(Debug, Deserialize)]
-struct SysLink {
+struct PonoDefinition {
     source: String,
     target: String,
 }
@@ -89,15 +89,15 @@ fn main() {
 
     let config = maybe_config.unwrap();
 
-    // Validate all ponos before performing any action (link, unlink)
+    // Validate all ponos before performing filesystem operations
     match &args.command {
-        Commands::Link { ponos } | Commands::Unlink { ponos } => {
+        Commands::Enable { ponos } | Commands::Disable { ponos } => {
             for pkg_name in ponos_to_manipulate(&config, &ponos) {
-                let syslink = config.ponos.get(&pkg_name).unwrap();
-                match validate_package(&syslink) {
+                let pono_definition = config.ponos.get(&pkg_name).unwrap();
+                match validate_package(&pono_definition) {
                     Ok(_) => (),
                     Err(PonoError::TargetAlreadyExists(err)) => {
-                        if let Commands::Link { .. } = args.command {
+                        if let Commands::Enable { .. } = args.command {
                             print!("{}", RED);
                             println!("Invalid ponos: {}", pkg_name);
                             println!("Reason: {}", err);
@@ -119,21 +119,24 @@ fn main() {
     }
 
     match args.command {
-        Commands::Link { ponos } => {
+        Commands::Enable { ponos } => {
             // Commands with side effects
             println!("Linking ponos");
             for pkg_name in ponos_to_manipulate(&config, &ponos) {
-                let syslink = config.ponos.get(&pkg_name).unwrap();
+                let pono_definition = config.ponos.get(&pkg_name).unwrap();
 
                 println!(
                     "{}  {} -> {} (linking)",
-                    pkg_name, syslink.source, syslink.target
+                    pkg_name, pono_definition.source, pono_definition.target
                 );
-                let src_path = path(&syslink.source);
+                let src_path = path(&pono_definition.source);
 
-                match symlink(&src_path, &syslink.target) {
+                match symlink(&src_path, &pono_definition.target) {
                     Ok(_) => {
-                        println!("{}  {}: {} (new link)", GREEN, pkg_name, syslink.target)
+                        println!(
+                            "{}  {}: {} (new link)",
+                            GREEN, pkg_name, pono_definition.target
+                        )
                     }
                     Err(err) => {
                         println!("{}Pono link failed reason: {}", RED, err);
@@ -143,10 +146,10 @@ fn main() {
                 print!("{}", RESET);
             }
         }
-        Commands::Unlink { ponos } => {
+        Commands::Disable { ponos } => {
             for pkg_name in ponos_to_manipulate(&config, &ponos) {
-                let syslink = config.ponos.get(&pkg_name).unwrap();
-                match std::fs::remove_file(&syslink.target) {
+                let pono_definition = config.ponos.get(&pkg_name).unwrap();
+                match std::fs::remove_file(&pono_definition.target) {
                     Ok(_) => println!("Unlinked pono: {}", pkg_name),
                     Err(err) => {
                         print!("{}", RED);
@@ -163,16 +166,16 @@ fn main() {
             println!("Status:");
             let mut has_error = false;
             for pkg_name in ponos_to_manipulate(&config, &ponos) {
-                let syslink = config.ponos.get(&pkg_name).unwrap();
+                let pono_definition = config.ponos.get(&pkg_name).unwrap();
 
-                match check_package(&syslink) {
+                match check_package(&pono_definition) {
                     Ok(_) => {
                         print!("{}", GREEN);
-                        println!("  {} {} (linked)", pkg_name, syslink.target);
+                        println!("  {} {} (linked)", pkg_name, pono_definition.target);
                     }
                     Err(err) => {
                         print!("{}", RED);
-                        println!("  {} {} (broken)", pkg_name, syslink.target);
+                        println!("  {} {} (broken)", pkg_name, pono_definition.target);
                         println!("  Reason: {}", err);
                         has_error = true;
                     }
@@ -186,8 +189,8 @@ fn main() {
         }
         Commands::List => {
             println!("Ponos:");
-            for (package, syslink) in config.ponos.iter() {
-                println!("  {}: {}", package, syslink.source);
+            for (package, pono_definition) in config.ponos.iter() {
+                println!("  {}: {}", package, pono_definition.source);
             }
         }
     }
@@ -204,7 +207,7 @@ impl Display for PonoError {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         match self {
             PonoError::NotFound(msg) => write!(f, "(not-found) {}", msg),
-            PonoError::NotSymlink(msg) => write!(f, "(non-syslink) {}", msg),
+            PonoError::NotSymlink(msg) => write!(f, "(non-pono_definition) {}", msg),
             PonoError::LinkMismatch(msg) => write!(f, "(link-mismatch) {}", msg),
             PonoError::TargetAlreadyExists(msg) => write!(f, "(not-available) {}", msg),
             PonoError::Unhandled(msg) => write!(f, "{}", msg),
@@ -212,7 +215,7 @@ impl Display for PonoError {
     }
 }
 
-fn validate_package(package: &SysLink) -> Result<(), PonoError> {
+fn validate_package(package: &PonoDefinition) -> Result<(), PonoError> {
     let sln_path = path(&package.target);
     let src_path = path(&package.source);
 
@@ -258,7 +261,7 @@ fn validate_package(package: &SysLink) -> Result<(), PonoError> {
     Ok(())
 }
 
-fn check_package(package: &SysLink) -> Result<(), PonoError> {
+fn check_package(package: &PonoDefinition) -> Result<(), PonoError> {
     let sln_path = path(&package.target);
     let src_path = path(&package.source);
 

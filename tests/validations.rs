@@ -65,7 +65,7 @@ fn it_fails_when_target_exist_and_isnt_a_symbolic_link() -> Result<(), Box<dyn s
     let pono_config = "examples/configs/invalid-target-is-not-link.toml";
     let mut cmd = Command::cargo_bin(BINARY_NAME)?;
 
-    cmd.arg("-c").arg(pono_config).arg("link").arg("notlink");
+    cmd.arg("-c").arg(pono_config).arg("enable").arg("notlink");
 
     cmd.assert()
         .failure()
@@ -82,7 +82,10 @@ fn it_fails_when_source_is_missing() -> Result<(), Box<dyn std::error::Error>> {
     let pono_config = "examples/configs/invalid-target-is-not-link.toml";
     let mut cmd = Command::cargo_bin(BINARY_NAME)?;
 
-    cmd.arg("-c").arg(pono_config).arg("link").arg("doesnexist");
+    cmd.arg("-c")
+        .arg(pono_config)
+        .arg("enable")
+        .arg("doesnexist");
 
     cmd.assert()
         .failure()

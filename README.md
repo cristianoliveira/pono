@@ -19,7 +19,7 @@ zsh = { source = "./examples/from/zshrc", target = "./examples/to/.zshrc" }
 ```
 And run
 ```bash
-pono link -c example/pono.toml
+pono enable -c example/pono.toml
 Linking packages
   nvim: ./examples/to/nvim (new link)
   zsh: ./examples/to/.zshrc (new link)
@@ -70,10 +70,11 @@ The **pono** CLI allows you to install, remove, and check symlinks based on a TO
 
 ### Commands
 
-- `link`: Create symbolic links for the specified packages.
-- `unlink`: Remove symbolic links for the specified packages.
-- `status`: Check the status of symbolic links.
-- `list`: Display all available packages from the TOML configuration.
+- `enable`: Create symbolic links for the defined ponos.
+- `disable`: Remove symbolic links for the defined ponos.
+- `toggle`: Toggle a given ponoa and verify.
+- `status`: Check the status the define ponos.
+- `list`: Display all available ponos from the TOML configuration.
 
 ### Options
 
@@ -82,32 +83,32 @@ The **pono** CLI allows you to install, remove, and check symlinks based on a TO
 
 ### Basic Usage
 
-#### Installing Symlinks
+#### Enabling symlinks (ponos)
 
 To create symlinks for all packages defined in `pono.toml`:
 
 ```bash
-pono link
+pono enable
 ```
 
-To link symlinks for specific packages:
+To enable symlinks for specific packages:
 
 ```bash
-pono link package1 package2
+pono enable package1 package2
 ```
 
-#### Uninstalling Symlinks
+#### Disabling symlinks (ponos)
 
 To remove symlinks for all packages:
 
 ```bash
-pono unlink
+pono disable
 ```
 
-To unlink specific packages:
+To disable specific packages:
 
 ```bash
-pono unlink package1
+pono disable package1
 ```
 
 #### Checking Symlink Status
