@@ -41,7 +41,7 @@ fn it_link_the_ponos() -> Result<(), Box<dyn std::error::Error>> {
     cleanup();
     let mut cmd = Command::cargo_bin(BINARY_NAME)?;
 
-    cmd.arg("-c").arg("examples/basic.toml").arg("link");
+    cmd.arg("-c").arg("examples/basic.toml").arg("enable");
 
     cmd.assert()
         .success()
@@ -78,7 +78,7 @@ fn it_link_the_ponos() -> Result<(), Box<dyn std::error::Error>> {
     cmd = Command::cargo_bin(BINARY_NAME)?;
     cmd.arg("-c")
         .arg("examples/basic.toml")
-        .arg("unlink")
+        .arg("disable")
         .arg("nvim");
 
     cmd.assert()
