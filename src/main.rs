@@ -6,7 +6,7 @@ use std::fmt::{Display, Formatter};
 use std::os::unix::fs::symlink;
 use std::path::PathBuf;
 
-/// Slot is a simple tool to manage symbolic links with toml
+/// pono - pack and organize symlinks once
 #[derive(Parser, Debug)]
 #[command(version, about, long_about = None, arg_required_else_help(true))]
 struct Args {
@@ -14,36 +14,36 @@ struct Args {
     #[command(subcommand)]
     command: Commands,
 
-    /// Optional config file path (default: slot.toml)
+    /// Optional config file path (default: pono.toml)
     #[clap(short, long)]
     config: Option<String>,
 }
 
 #[derive(Subcommand, Debug)]
 enum Commands {
-    /// Link all or a space-separated list of packages
+    /// Link all or a space-separated list of ponos
     Link {
-        /// Optional list of packages to link (default: all)
-        packages: Option<Vec<String>>,
+        /// Optional list of ponos to link (default: all)
+        ponos: Option<Vec<String>>,
     },
-    /// Remove the link of all or a space-separated list of packages
+    /// Remove the link of all or a space-separated list of ponos
     Unlink {
-        /// Optional list of packages to link (default: all)
-        packages: Option<Vec<String>>,
+        /// Optional list of ponos to link (default: all)
+        ponos: Option<Vec<String>>,
     },
-    /// Display the status of all packages
+    /// Display the status of all ponos
     Status {
-        /// Optional list of packages to check (default: all)
-        packages: Option<Vec<String>>,
+        /// Optional list of ponos to check (default: all)
+        ponos: Option<Vec<String>>,
     },
-    /// List all packages in the configuration
+    /// List all ponos in the configuration
     List,
 }
 
 // Configuration file format
 #[derive(Debug, Deserialize)]
 struct Configuration {
-    packages: HashMap<String, SysLink>,
+    ponos: HashMap<String, SysLink>,
 }
 
 #[derive(Debug, Deserialize)]
@@ -58,7 +58,7 @@ const RESET: &str = "\x1b[0m";
 
 fn main() {
     let args = Args::parse();
-    let config = args.config.unwrap_or("slot.toml".to_string());
+    let config = args.config.unwrap_or("pono.toml".to_string());
     let config_path = path(&config);
     let toml_content = match std::fs::read_to_string(&config_path) {
         Ok(content) => content,
@@ -74,7 +74,7 @@ fn main() {
     let maybe_config: Option<Configuration> = match toml::from_str(&toml_content) {
         Ok(config) => Some(config),
         Err(err) => {
-            println!("Invalid slot configuration file");
+            println!("Invalid pono configuration file");
             println!("Reason: {}", err);
             println!("Debugging:");
             println!(" - Check if the file is a valid TOML file");
@@ -89,17 +89,17 @@ fn main() {
 
     let config = maybe_config.unwrap();
 
-    // Validate all packages before performing any action (link, unlink)
+    // Validate all ponos before performing any action (link, unlink)
     match &args.command {
-        Commands::Link { packages } | Commands::Unlink { packages } => {
-            for pkg_name in packages_to_manipulate(&config, &packages) {
-                let syslink = config.packages.get(&pkg_name).unwrap();
+        Commands::Link { ponos } | Commands::Unlink { ponos } => {
+            for pkg_name in ponos_to_manipulate(&config, &ponos) {
+                let syslink = config.ponos.get(&pkg_name).unwrap();
                 match validate_package(&syslink) {
                     Ok(_) => (),
-                    Err(SlotError::TargetAlreadyExists(err)) => {
+                    Err(PonoError::TargetAlreadyExists(err)) => {
                         if let Commands::Link { .. } = args.command {
                             print!("{}", RED);
-                            println!("Invalid package: {}", pkg_name);
+                            println!("Invalid ponos: {}", pkg_name);
                             println!("Reason: {}", err);
                             print!("{}", RESET);
                             std::process::exit(1);
@@ -107,7 +107,7 @@ fn main() {
                     }
                     Err(err) => {
                         print!("{}", RED);
-                        println!("Invalid package: {}", pkg_name);
+                        println!("Invalid pono: {}", pkg_name);
                         println!("Reason: {}", err);
                         print!("{}", RESET);
                         std::process::exit(1);
@@ -119,11 +119,11 @@ fn main() {
     }
 
     match args.command {
-        Commands::Link { packages } => {
+        Commands::Link { ponos } => {
             // Commands with side effects
-            println!("Linking packages");
-            for pkg_name in packages_to_manipulate(&config, &packages) {
-                let syslink = config.packages.get(&pkg_name).unwrap();
+            println!("Linking ponos");
+            for pkg_name in ponos_to_manipulate(&config, &ponos) {
+                let syslink = config.ponos.get(&pkg_name).unwrap();
 
                 println!(
                     "{}  {} -> {} (linking)",
@@ -136,21 +136,21 @@ fn main() {
                         println!("{}  {}: {} (new link)", GREEN, pkg_name, syslink.target)
                     }
                     Err(err) => {
-                        println!("{}Package link failed reason: {}", RED, err);
+                        println!("{}Pono link failed reason: {}", RED, err);
                         std::process::exit(1);
                     }
                 };
                 print!("{}", RESET);
             }
         }
-        Commands::Unlink { packages } => {
-            for pkg_name in packages_to_manipulate(&config, &packages) {
-                let syslink = config.packages.get(&pkg_name).unwrap();
+        Commands::Unlink { ponos } => {
+            for pkg_name in ponos_to_manipulate(&config, &ponos) {
+                let syslink = config.ponos.get(&pkg_name).unwrap();
                 match std::fs::remove_file(&syslink.target) {
-                    Ok(_) => println!("Unlinked package: {}", pkg_name),
+                    Ok(_) => println!("Unlinked pono: {}", pkg_name),
                     Err(err) => {
                         print!("{}", RED);
-                        println!("Failed to unlink package: {}", err);
+                        println!("Failed to unlink pono: {}", err);
                         print!("{}", RESET);
                         std::process::exit(1);
                     }
@@ -159,11 +159,11 @@ fn main() {
         }
 
         // Commands without side effects
-        Commands::Status { packages } => {
+        Commands::Status { ponos } => {
             println!("Status:");
             let mut has_error = false;
-            for pkg_name in packages_to_manipulate(&config, &packages) {
-                let syslink = config.packages.get(&pkg_name).unwrap();
+            for pkg_name in ponos_to_manipulate(&config, &ponos) {
+                let syslink = config.ponos.get(&pkg_name).unwrap();
 
                 match check_package(&syslink) {
                     Ok(_) => {
@@ -185,41 +185,41 @@ fn main() {
             }
         }
         Commands::List => {
-            println!("Packages:");
-            for (package, syslink) in config.packages.iter() {
+            println!("Ponos:");
+            for (package, syslink) in config.ponos.iter() {
                 println!("  {}: {}", package, syslink.source);
             }
         }
     }
 }
 
-enum SlotError {
+enum PonoError {
     NotFound(String),
     NotSymlink(String),
     TargetAlreadyExists(String),
     LinkMismatch(String),
     Unhandled(String),
 }
-impl Display for SlotError {
+impl Display for PonoError {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         match self {
-            SlotError::NotFound(msg) => write!(f, "(not-found) {}", msg),
-            SlotError::NotSymlink(msg) => write!(f, "(non-syslink) {}", msg),
-            SlotError::LinkMismatch(msg) => write!(f, "(link-mismatch) {}", msg),
-            SlotError::TargetAlreadyExists(msg) => write!(f, "(not-available) {}", msg),
-            SlotError::Unhandled(msg) => write!(f, "{}", msg),
+            PonoError::NotFound(msg) => write!(f, "(not-found) {}", msg),
+            PonoError::NotSymlink(msg) => write!(f, "(non-syslink) {}", msg),
+            PonoError::LinkMismatch(msg) => write!(f, "(link-mismatch) {}", msg),
+            PonoError::TargetAlreadyExists(msg) => write!(f, "(not-available) {}", msg),
+            PonoError::Unhandled(msg) => write!(f, "{}", msg),
         }
     }
 }
 
-fn validate_package(package: &SysLink) -> Result<(), SlotError> {
+fn validate_package(package: &SysLink) -> Result<(), PonoError> {
     let sln_path = path(&package.target);
     let src_path = path(&package.source);
 
     // check if source exists
     if !std::path::Path::new(&src_path).exists() {
-        return Err(SlotError::NotFound(format!(
-            "Package source does not exist: {} ",
+        return Err(PonoError::NotFound(format!(
+            "Pono source does not exist: {} ",
             src_path
         )));
     }
@@ -228,7 +228,7 @@ fn validate_package(package: &SysLink) -> Result<(), SlotError> {
         let sln_metadata = match std::fs::symlink_metadata(&sln_path) {
             Ok(metadata) => metadata,
             Err(err) => {
-                return Err(SlotError::Unhandled(format!(
+                return Err(PonoError::Unhandled(format!(
                     "Target isn't accessible: {:?}",
                     err
                 )))
@@ -244,13 +244,13 @@ fn validate_package(package: &SysLink) -> Result<(), SlotError> {
                 "unknown"
             };
 
-            return Err(SlotError::TargetAlreadyExists(format!(
+            return Err(PonoError::TargetAlreadyExists(format!(
                 "(not-available) Target path '{}' already exists and is a {}.",
                 &package.target, type_str
             )));
         }
-        return Err(SlotError::TargetAlreadyExists(format!(
-            "(not-avaiable) Package target already exists: {}",
+        return Err(PonoError::TargetAlreadyExists(format!(
+            "(not-avaiable) Pono target already exists: {}",
             src_path
         )));
     }
@@ -258,14 +258,14 @@ fn validate_package(package: &SysLink) -> Result<(), SlotError> {
     Ok(())
 }
 
-fn check_package(package: &SysLink) -> Result<(), SlotError> {
+fn check_package(package: &SysLink) -> Result<(), PonoError> {
     let sln_path = path(&package.target);
     let src_path = path(&package.source);
 
     let sln_metadata = match std::fs::symlink_metadata(&sln_path) {
         Ok(metadata) => metadata,
         Err(err) => {
-            return Err(SlotError::NotFound(format!(
+            return Err(PonoError::NotFound(format!(
                 "Failed to read metadata: {:?}",
                 err
             )))
@@ -281,7 +281,7 @@ fn check_package(package: &SysLink) -> Result<(), SlotError> {
             "unknown"
         };
 
-        return Err(SlotError::NotSymlink(format!(
+        return Err(PonoError::NotSymlink(format!(
             "Target path '{}' already exists and is a {}.",
             &package.target, type_str
         )));
@@ -290,7 +290,7 @@ fn check_package(package: &SysLink) -> Result<(), SlotError> {
     let target_path = std::fs::read_link(sln_path).expect("Failed to read link");
 
     if !target_path.exists() {
-        return Err(SlotError::NotFound(format!(
+        return Err(PonoError::NotFound(format!(
             "Target path does not exist: {}",
             target_path.display()
         )));
@@ -300,7 +300,7 @@ fn check_package(package: &SysLink) -> Result<(), SlotError> {
     let target_metatada = match std::fs::metadata(&target_path) {
         Ok(metadata) => metadata,
         Err(err) => {
-            return Err(SlotError::Unhandled(format!(
+            return Err(PonoError::Unhandled(format!(
                 "Failed to read target metadata: {}",
                 err
             )))
@@ -309,7 +309,7 @@ fn check_package(package: &SysLink) -> Result<(), SlotError> {
     let src_metadata = match std::fs::metadata(src_path) {
         Ok(metadata) => metadata,
         Err(err) => {
-            return Err(SlotError::Unhandled(format!(
+            return Err(PonoError::Unhandled(format!(
                 "Failed to read source metadata: {}",
                 err
             )))
@@ -321,7 +321,7 @@ fn check_package(package: &SysLink) -> Result<(), SlotError> {
         return Ok(());
     }
 
-    Err(SlotError::LinkMismatch(format!(
+    Err(PonoError::LinkMismatch(format!(
         "Package link mismatch between target '{}' and source '{}'",
         package.target, package.source
     )))
@@ -351,21 +351,21 @@ fn path(path: &str) -> String {
     absolute_path.to_string_lossy().to_string()
 }
 
-fn packages_to_manipulate(config: &Configuration, packages: &Option<Vec<String>>) -> Vec<String> {
+fn ponos_to_manipulate(config: &Configuration, ponos: &Option<Vec<String>>) -> Vec<String> {
     config
-        .packages
+        .ponos
         .keys()
-        .filter(|p| contain_package(packages, p))
+        .filter(|p| contain_package(ponos, p))
         .map(|s| s.to_string())
         .collect()
 }
 
-fn contain_package(packages: &Option<Vec<String>>, package: &str) -> bool {
-    if packages.is_none() {
+fn contain_package(ponos: &Option<Vec<String>>, package: &str) -> bool {
+    if ponos.is_none() {
         return true;
     }
 
-    if let Some(ref pckgs) = packages {
+    if let Some(ref pckgs) = ponos {
         if pckgs.contains(&package.to_string()) {
             return true;
         }

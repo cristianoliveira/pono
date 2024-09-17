@@ -1,3 +1,3 @@
-[packages]
+[ponos]
 nvim = { source = "./examples/from/nvim", target = "./examples/to/nvim" }
 zsh = { source = "./examples/from/zshrc", target = "./examples/to/.zshrc" }

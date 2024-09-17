@@ -21,8 +21,8 @@
 
 - name: nix flake 
   run: 
-    - nix build .#slot
-    - nix build .#slotNigthly
+    - nix build .#pono
+    - nix build .#ponoNigthly
   change: 
     - Cargo.toml
     - src/**

@@ -1,5 +1,5 @@
 { pkgs, system }: 
 {
-  slot = pkgs.callPackage ./nix/slot.nix { };
-  slotNigthly = pkgs.callPackage ./nix/slot-nightly.nix { };
+  pono = pkgs.callPackage ./nix/pono.nix { };
+  ponoNigthly = pkgs.callPackage ./nix/pono-nightly.nix { };
 }

@@ -1,9 +1,11 @@
 use assert_cmd::Command;
 use predicates::prelude::predicate;
 
+const BINARY_NAME: &str = "pono";
+
 #[test]
 fn it_fails_when_config_file_doesnt_exist() -> Result<(), Box<dyn std::error::Error>> {
-    let mut cmd = Command::cargo_bin("slot")?;
+    let mut cmd = Command::cargo_bin(BINARY_NAME)?;
 
     cmd.arg("-c")
         .arg("examples/configs/unknown.toml")
@@ -24,14 +26,14 @@ fn it_fails_when_config_file_doesnt_exist() -> Result<(), Box<dyn std::error::Er
 
 #[test]
 fn it_fails_when_config_lacks_packages() -> Result<(), Box<dyn std::error::Error>> {
-    let slot_config = "examples/configs/invalid-missing-packages.toml";
-    let mut cmd = Command::cargo_bin("slot")?;
+    let pono_config = "examples/configs/invalid-missing-packages.toml";
+    let mut cmd = Command::cargo_bin(BINARY_NAME)?;
 
-    cmd.arg("-c").arg(slot_config).arg("list");
+    cmd.arg("-c").arg(pono_config).arg("list");
 
     cmd.assert()
         .failure()
-        .stdout(predicate::str::contains("Invalid slot configuration file"))
+        .stdout(predicate::str::contains("Invalid pono configuration file"))
         .stdout(predicate::str::contains(
             "Reason: TOML parse error at line 1, column 1",
         ))
@@ -42,14 +44,14 @@ fn it_fails_when_config_lacks_packages() -> Result<(), Box<dyn std::error::Error
 
 #[test]
 fn it_fails_when_contains_invalid_package() -> Result<(), Box<dyn std::error::Error>> {
-    let slot_config = "examples/configs/invalid-package.toml";
-    let mut cmd = Command::cargo_bin("slot")?;
+    let pono_config = "examples/configs/invalid-package.toml";
+    let mut cmd = Command::cargo_bin(BINARY_NAME)?;
 
-    cmd.arg("-c").arg(slot_config).arg("list");
+    cmd.arg("-c").arg(pono_config).arg("list");
 
     cmd.assert()
         .failure()
-        .stdout(predicate::str::contains("Invalid slot configuration file"))
+        .stdout(predicate::str::contains("Invalid pono configuration file"))
         .stdout(predicate::str::contains(
             "Reason: TOML parse error at line 2, column 7",
         ))
@@ -60,10 +62,10 @@ fn it_fails_when_contains_invalid_package() -> Result<(), Box<dyn std::error::Er
 
 #[test]
 fn it_fails_when_target_exist_and_isnt_a_symbolic_link() -> Result<(), Box<dyn std::error::Error>> {
-    let slot_config = "examples/configs/invalid-target-is-not-link.toml";
-    let mut cmd = Command::cargo_bin("slot")?;
+    let pono_config = "examples/configs/invalid-target-is-not-link.toml";
+    let mut cmd = Command::cargo_bin(BINARY_NAME)?;
 
-    cmd.arg("-c").arg(slot_config).arg("link").arg("notlink");
+    cmd.arg("-c").arg(pono_config).arg("link").arg("notlink");
 
     cmd.assert()
         .failure()
@@ -77,15 +79,15 @@ fn it_fails_when_target_exist_and_isnt_a_symbolic_link() -> Result<(), Box<dyn s
 
 #[test]
 fn it_fails_when_source_is_missing() -> Result<(), Box<dyn std::error::Error>> {
-    let slot_config = "examples/configs/invalid-target-is-not-link.toml";
-    let mut cmd = Command::cargo_bin("slot")?;
+    let pono_config = "examples/configs/invalid-target-is-not-link.toml";
+    let mut cmd = Command::cargo_bin(BINARY_NAME)?;
 
-    cmd.arg("-c").arg(slot_config).arg("link").arg("doesnexist");
+    cmd.arg("-c").arg(pono_config).arg("link").arg("doesnexist");
 
     cmd.assert()
         .failure()
         .stdout(predicate::str::contains("Reason: (not-found)"))
-        .stdout(predicate::str::contains("Package source does not exist"));
+        .stdout(predicate::str::contains("Pono source does not exist"));
 
     Ok(())
 }

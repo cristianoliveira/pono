@@ -1,4 +1,4 @@
-[packages]
+[ponos]
 foo = { path = "foo" }
 # Correct format
 # foo = { source = "./foo", target = "~/.config/foo" }

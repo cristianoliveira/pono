@@ -1,25 +1,25 @@
-# slot - Symbolic Link Organizer with TOML
+# pono - pack and organize symlinks once
 
-[![Crate version](https://img.shields.io/crates/v/slot-cli.svg?)](https://crates.io/crates/slot-cli)
-[![CI checks](https://github.com/cristianoliveira/slot/actions/workflows/on-push.yml/badge.svg)](https://github.com/cristianoliveira/slot/actions/workflows/on-push.yml)
+[![Crate version](https://img.shields.io/crates/v/pono.svg?)](https://crates.io/crates/pono)
+[![CI checks](https://github.com/cristianoliveira/pono/actions/workflows/on-push.yml/badge.svg)](https://github.com/cristianoliveira/pono/actions/workflows/on-push.yml)
 
-**slot** is a lightweight command-line tool for managing symbolic links in your filesystem inspired by `stow`. 
+**pono** (__poh-no__ to place/store in latin) is a cli for managing symbolic links in one place inspired by `stow`. Because symbolic links managment in bash script sucks.
 
 ## Why?
 
-Because [GNU stow](https://www.gnu.org/software/stow/) does almost what I wanted, but not quite. I wanted a simpler tool that could manage symlinks for multiple packages independent of the source file structure, using a flat configuration. I also need to be able to toogle links on demand to apply different configs.
+Let's face it, managing symbolic links with bash scripts sucks because `ln` has poor defaults. The alternative [GNU stow](https://www.gnu.org/software/stow/) does almost what I wanted, but not quite. I wanted a tool that could manage symlinks for multiple packages independent of the source file structure, using a flat configuration. I also need to be able to toogle links on demand to apply different configs.
 
 ## Demo
 
-Create the `slot.toml` in the current directory
+Create the `pono.toml` in the current directory
 ```toml
-[packages]
+[ponos]
 nvim = { source = "./examples/from/nvim", target = "./examples/to/nvim" }
 zsh = { source = "./examples/from/zshrc", target = "./examples/to/.zshrc" }
 ```
 And run
 ```bash
-slot link -c example/slot.toml
+pono link -c example/pono.toml
 Linking packages
   nvim: ./examples/to/nvim (new link)
   zsh: ./examples/to/.zshrc (new link)
@@ -28,8 +28,8 @@ ls -la examples/to                                                              
 total 0
 drwxr-xr-x 4 cris 128 Sep 14 01:00 .
 drwxr-xr-x 5 cris 160 Sep 14 01:00 ..
-lrwxr-xr-x 1 cris  58 Sep 14 01:00 .zshrc -> /home/cris/slot/./examples/src/zshrc
-lrwxr-xr-x 1 cris  57 Sep 14 01:00 nvim -> /home/cris/slot/./examples/src/nvim
+lrwxr-xr-x 1 cris  58 Sep 14 01:00 .zshrc -> /home/cris/pono/./examples/src/zshrc
+lrwxr-xr-x 1 cris  57 Sep 14 01:00 nvim -> /home/cris/pono/./examples/src/nvim
 cr
 ```
 
@@ -58,15 +58,15 @@ cr
 
 ### With Cargo
 
-You can install **Slot** using [Cargo](https://doc.rust-lang.org/cargo/):
+You can install **pono** using [Cargo](https://doc.rust-lang.org/cargo/):
 
 ```bash
-cargo install slot-cli
+cargo install pono
 ```
 
 ## Usage
 
-The **Slot** CLI allows you to install, remove, and check symlinks based on a TOML configuration file.
+The **pono** CLI allows you to install, remove, and check symlinks based on a TOML configuration file.
 
 ### Commands
 
@@ -77,23 +77,23 @@ The **Slot** CLI allows you to install, remove, and check symlinks based on a TO
 
 ### Options
 
-- `-c --config <file>`: Specify a custom TOML configuration file (default: `./slot.toml`).
+- `-c --config <file>`: Specify a custom TOML configuration file (default: `./pono.toml`).
 - `--help`: Display help information.
 
 ### Basic Usage
 
 #### Installing Symlinks
 
-To create symlinks for all packages defined in `slot.toml`:
+To create symlinks for all packages defined in `pono.toml`:
 
 ```bash
-slot link
+pono link
 ```
 
 To link symlinks for specific packages:
 
 ```bash
-slot link package1 package2
+pono link package1 package2
 ```
 
 #### Uninstalling Symlinks
@@ -101,13 +101,13 @@ slot link package1 package2
 To remove symlinks for all packages:
 
 ```bash
-slot unlink
+pono unlink
 ```
 
 To unlink specific packages:
 
 ```bash
-slot unlink package1
+pono unlink package1
 ```
 
 #### Checking Symlink Status
@@ -115,9 +115,9 @@ slot unlink package1
 To check the status of all symlinks:
 
 ```bash
-slot status
+pono status
 # OR
-slot status package1 package2
+pono status package1 package2
 ```
 
 #### Listing All Packages
@@ -125,7 +125,7 @@ slot status package1 package2
 To list all available packages from the TOML configuration:
 
 ```bash
-slot list
+pono list
 ```
 
 ### Help
@@ -133,25 +133,25 @@ slot list
 For more detailed command usage, run:
 
 ```bash
-slot --help
+pono --help
 ```
 
 ## Configuration
 
-The configuration is defined in a `slot.toml` file. It specifies the source directories for your packages and where the symlinks should be created.
+The configuration is defined in a `pono.toml` file. It specifies the source directories for your packages and where the symlinks should be created.
 
-### Example `slot.toml`:
+### Example `pono.toml`:
 
 ```toml
-[packages.package1]
+[ponos.package1]
 source = "path/to/package1"
 target = "/usr/local/bin"
 
-[packages.package2]
+[ponos.package2]
 source = "path/to/package2"
 target = "/home/user/.config"
 
-[packages.package3]
+[ponos.package3]
 source = "path/to/package3"
 target = "/opt/tools"
 ```
@@ -189,5 +189,5 @@ cargo fmt
 
 ## License
 
-**Slot** is licensed under the [MIT License](LICENSE).
+**pono** is licensed under the [MIT License](LICENSE).
 

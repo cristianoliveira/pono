@@ -1,4 +1,4 @@
-[packages]
+[ponos]
 # This is an example when the target already exist and isn't a link
 notlink = { source = "examples/from/zshrc", target = "examples/to/.gitkeep" }
 nvim = { source = "examples/from/nvim", target = "examples/to/nvim" }

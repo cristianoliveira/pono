@@ -1,6 +1,8 @@
 use assert_cmd::Command;
 use predicates::prelude::predicate;
 
+const BINARY_NAME: &str = "pono";
+
 fn cleanup() {
     let current_dir = std::env::current_dir().unwrap();
     let examples_dir = current_dir.join("examples/to");
@@ -20,14 +22,14 @@ fn cleanup() {
 }
 
 #[test]
-fn it_list_the_packages_declared_in_the_config() -> Result<(), Box<dyn std::error::Error>> {
-    let mut cmd = Command::cargo_bin("slot")?;
+fn it_list_the_ponos_declared_in_the_config() -> Result<(), Box<dyn std::error::Error>> {
+    let mut cmd = Command::cargo_bin(BINARY_NAME)?;
 
     cmd.arg("-c").arg("examples/basic.toml").arg("list");
 
     cmd.assert()
         .success()
-        .stdout(predicate::str::contains("Packages:"))
+        .stdout(predicate::str::contains("Ponos:"))
         .stdout(predicate::str::contains("nvim: ./examples/from/nvim"))
         .stdout(predicate::str::contains("zsh: ./examples/from/zshrc"));
 
@@ -35,15 +37,15 @@ fn it_list_the_packages_declared_in_the_config() -> Result<(), Box<dyn std::erro
 }
 
 #[test]
-fn it_link_the_packages() -> Result<(), Box<dyn std::error::Error>> {
+fn it_link_the_ponos() -> Result<(), Box<dyn std::error::Error>> {
     cleanup();
-    let mut cmd = Command::cargo_bin("slot")?;
+    let mut cmd = Command::cargo_bin(BINARY_NAME)?;
 
     cmd.arg("-c").arg("examples/basic.toml").arg("link");
 
     cmd.assert()
         .success()
-        .stdout(predicate::str::contains("Linking packages"))
+        .stdout(predicate::str::contains("Linking ponos"))
         .stdout(predicate::str::contains(
             "nvim: ./examples/to/nvim (new link)",
         ))
@@ -62,7 +64,7 @@ fn it_link_the_packages() -> Result<(), Box<dyn std::error::Error>> {
     let zsh_source_content = std::fs::read_to_string("examples/from/zshrc")?;
     assert_eq!(zsh_target_content, zsh_source_content);
 
-    cmd = Command::cargo_bin("slot")?;
+    cmd = Command::cargo_bin(BINARY_NAME)?;
     cmd.arg("-c")
         .arg("examples/basic.toml")
         .arg("status")
@@ -73,7 +75,7 @@ fn it_link_the_packages() -> Result<(), Box<dyn std::error::Error>> {
         .stdout(predicate::str::contains("nvim ./examples/to/nvim (linked)"))
         .stdout(predicate::str::contains("zsh ./examples/to/.zshrc (linked)").count(0));
 
-    cmd = Command::cargo_bin("slot")?;
+    cmd = Command::cargo_bin(BINARY_NAME)?;
     cmd.arg("-c")
         .arg("examples/basic.toml")
         .arg("unlink")
@@ -81,7 +83,7 @@ fn it_link_the_packages() -> Result<(), Box<dyn std::error::Error>> {
 
     cmd.assert()
         .success()
-        .stdout(predicate::str::contains("Unlinked package: nvim"));
+        .stdout(predicate::str::contains("Unlinked pono: nvim"));
 
     cleanup();
     Ok(())

@@ -1,13 +1,13 @@
 { lib , rustPlatform , stdenv , darwin }:
 
 rustPlatform.buildRustPackage {
-  pname = "slot";
+  pname = "pono";
   version = "nightly-2024-09-16";
 
   ## build with local source
   src = ../.;
 
-  cargoHash = "sha256-xdj6AOxYcfjq/EBPNzVdwlLRk1UL9MK1F7ISQWluWAQ=";
+  cargoHash = "";
 
   buildInputs = lib.optionals stdenv.isDarwin [
     darwin.apple_sdk.frameworks.CoreServices
@@ -18,9 +18,9 @@ rustPlatform.buildRustPackage {
   '';
 
   meta = with lib; {
-    description = "A symbolic link organizer with toml.";
-    homepage = "https://github.com/cristianoliveira/slot";
-    changelog = "https://github.com/cristianoliveira/slot/releases";
+    description = "pono - place and organize symlinks once";
+    homepage = "https://github.com/cristianoliveira/pono";
+    changelog = "https://github.com/cristianoliveira/pono/releases/tag/${src.rev}";
     license = licenses.mit;
     maintainers = with maintainers; [ cristianoliveira ];
   };

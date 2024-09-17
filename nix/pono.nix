@@ -1,17 +1,17 @@
 { lib , rustPlatform , fetchFromGitHub , stdenv , darwin }:
 
 rustPlatform.buildRustPackage rec {
-  pname = "slot";
+  pname = "pono";
   version = "0.1.0";
 
   src = fetchFromGitHub {
     owner = "cristianoliveira";
-    repo = "slot";
+    repo = "pono";
     rev = "v${version}";
-    hash = "sha256-CYXMDYnE+c3aa8skkhHGAyRqXxHJ9UhSVP7iiNK2O+o=";
+    hash = "";
   };
 
-  cargoHash = "sha256-sEfamaVCzHowNK/BidVJps/xXKKOPnV2yVo38GP9mb0=";
+  cargoHash = "";
 
   checkPhase = ''
     cargo test
@@ -22,9 +22,9 @@ rustPlatform.buildRustPackage rec {
   ];
 
   meta = with lib; {
-    description = "A symbolic link organizer with toml.";
-    homepage = "https://github.com/cristianoliveira/slot";
-    changelog = "https://github.com/cristianoliveira/slot/releases/tag/${src.rev}";
+    description = "pono - pack and organize symlinks once";
+    homepage = "https://github.com/cristianoliveira/pono";
+    changelog = "https://github.com/cristianoliveira/pono/releases/tag/${src.rev}";
     license = licenses.mit;
     maintainers = with maintainers; [ cristianoliveira ];
   };

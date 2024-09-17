@@ -1,5 +1,5 @@
 {
-  description = "slot - Symbolic link organizer tool";
+  description = "pono - pack and organize symlinks once";
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs";
     utils.url = "github:numtide/flake-utils";

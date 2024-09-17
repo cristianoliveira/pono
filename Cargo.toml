@@ -1,16 +1,12 @@
 [package]
-name = "slot-cli"
+name = "pono"
 version = "0.1.0"
 edition = "2021"
 
-authors = ["Cristian Oliveira <me@cristianoliveira.com>"]
-description = "slot - A symbolic link organizer with toml."
+authors = ["Cristian Oliveira <public+crateio@cristianoliveira.com>"]
+description = "pono - pack and organize symlinks once"
 license = "MIT"
-repository = "https://github.com/cristianoliveira/slot"
-
-[[bin]]
-name = "slot"
-path = "src/main.rs"
+repository = "https://github.com/cristianoliveira/pono"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
