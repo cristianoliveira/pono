@@ -1,4 +1,5 @@
-use clap::{CommandFactory, Parser, Subcommand};
+use clap::builder::PossibleValue;
+use clap::{CommandFactory, Parser, Subcommand, ValueHint};
 use clap_complete::{generate, Shell};
 use serde::Deserialize;
 use std::collections::HashMap;
@@ -18,7 +19,7 @@ struct Args {
     command: Commands,
 
     /// Optional config file path (default: pono.toml)
-    #[clap(short, long)]
+    #[clap(short, long, value_hint = ValueHint::FilePath)]
     config: Option<String>,
 }
 
@@ -27,22 +28,25 @@ enum Commands {
     /// Enables all or a space-separated list of ponos
     Enable {
         /// Optional list of ponos to enable (default: all)
+        #[clap(value_parser(suggest_ponos()))]
         ponos: Option<Vec<String>>,
     },
     /// Disable all or a space-separated list of ponos
     Disable {
         /// Optional list of ponos to disable (default: all)
+        #[clap(value_parser(suggest_ponos()))]
         ponos: Option<Vec<String>>,
     },
     /// Display the status of all ponos
     Status {
         /// Optional list of ponos to check (default: all)
+        #[clap(value_parser(suggest_ponos()))]
         ponos: Option<Vec<String>>,
     },
     /// List all ponos in the configuration
     List,
 
-    /// Generate autocopletion based in $SHELL or the given shell
+    /// Generate autocompletion based on $SHELL or the specified shell
     Completions { shell: Option<Shell> },
 }
 
@@ -61,6 +65,19 @@ struct PonoDefinition {
 const GREEN: &str = "\x1b[32m";
 const RED: &str = "\x1b[31m";
 const RESET: &str = "\x1b[0m";
+
+fn suggest_ponos() -> Vec<PossibleValue> {
+    let config_path = env::args()
+        .collect::<Vec<String>>()
+        .into_iter()
+        .find(|s| s.ends_with(".toml"));
+    let config = load_config(&config_path);
+    config
+        .ponos
+        .keys()
+        .map(|s| PossibleValue::new(Into::<String>::into(s)))
+        .collect()
+}
 
 fn main() {
     let args = Args::parse();

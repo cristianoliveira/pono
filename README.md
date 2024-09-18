@@ -64,6 +64,14 @@ You can install **pono** using [Cargo](https://doc.rust-lang.org/cargo/):
 cargo install pono
 ```
 
+### With Nix
+
+You can install **pono** using [Nix](https://nixos.org/):
+
+```bash
+nix profile install github:cristianoliveira/pono#pono
+```
+
 # After Installation
 
 Enable pono completions for your shell by adding the following to your shell configuration file:
