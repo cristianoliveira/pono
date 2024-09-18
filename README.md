@@ -64,9 +64,17 @@ You can install **pono** using [Cargo](https://doc.rust-lang.org/cargo/):
 cargo install pono
 ```
 
+### With Nix
+
+You can install **pono** using [Nix](https://nixos.org/):
+
+```bash
+nix profile install github:cristianoliveira/pono#pono
+```
+
 ## Usage
 
-The **pono** CLI allows you to install, remove, and check symlinks based on a TOML configuration file.
+The **pono** CLI allows you to enable, disable, and verify symlinks based on a TOML configuration file.
 
 ### Commands
 

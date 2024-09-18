@@ -22,4 +22,4 @@ jobs:
       - run: mkdir -p /tmp/fzz
       - run: nix flake check
       - run: nix build .#pono --verbose
-      - run: nix build .#ponoNightly --verbose
+      - run: nix build .#ponoNigthly --verbose
