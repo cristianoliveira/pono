@@ -2,16 +2,16 @@
 
 rustPlatform.buildRustPackage rec {
   pname = "pono";
-  version = "0.1.0";
+  version = "0.2.0";
 
   src = fetchFromGitHub {
     owner = "cristianoliveira";
     repo = "pono";
     rev = "v${version}";
-    hash = "";
+    hash = "sha256-g3NZ9jf8gZfrhQfHsf+JW5fxB6FgsbGipMasHR1sMyM=";
   };
 
-  cargoHash = "";
+  cargoHash = "sha256-qCkKVH1CVKxzhhs5MFbYoJhJ9hSS52H3vZPLHdk/CvM=";
 
   checkPhase = ''
     cargo test
