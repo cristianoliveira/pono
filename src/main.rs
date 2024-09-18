@@ -58,40 +58,11 @@ const RESET: &str = "\x1b[0m";
 
 fn main() {
     let args = Args::parse();
-    let config = args.config.unwrap_or("pono.toml".to_string());
-    let config_path = path(&config);
-    let toml_content = match std::fs::read_to_string(&config_path) {
-        Ok(content) => content,
-        Err(err) => {
-            println!("Failed to read the {} file", config);
-            println!("Reason: {}", err);
-            println!("Debugging:");
-            println!(" - Check if file exists and is accessible (using ls -la)");
-            std::process::exit(1);
-        }
-    };
-
-    let maybe_config: Option<Configuration> = match toml::from_str(&toml_content) {
-        Ok(config) => Some(config),
-        Err(err) => {
-            println!("Invalid pono configuration file");
-            println!("Reason: {}", err);
-            println!("Debugging:");
-            println!(" - Check if the file is a valid TOML file");
-            println!(" - Check if the file has the correct format");
-            None
-        }
-    };
-
-    if maybe_config.is_none() {
-        std::process::exit(1);
-    }
-
-    let config = maybe_config.unwrap();
 
     // Validate all ponos before performing filesystem operations
     match &args.command {
         Commands::Enable { ponos } | Commands::Disable { ponos } => {
+            let config = load_config(&args.config);
             for pkg_name in ponos_to_manipulate(&config, &ponos) {
                 let pono_definition = config.ponos.get(&pkg_name).unwrap();
                 match validate_package(&pono_definition) {
@@ -121,6 +92,7 @@ fn main() {
     match args.command {
         Commands::Enable { ponos } => {
             // Commands with side effects
+            let config = load_config(&args.config);
             println!("Linking ponos");
             for pkg_name in ponos_to_manipulate(&config, &ponos) {
                 let pono_definition = config.ponos.get(&pkg_name).unwrap();
@@ -147,6 +119,7 @@ fn main() {
             }
         }
         Commands::Disable { ponos } => {
+            let config = load_config(&args.config);
             for pkg_name in ponos_to_manipulate(&config, &ponos) {
                 let pono_definition = config.ponos.get(&pkg_name).unwrap();
                 match std::fs::remove_file(&pono_definition.target) {
@@ -165,6 +138,7 @@ fn main() {
         Commands::Status { ponos } => {
             println!("Status:");
             let mut has_error = false;
+            let config = load_config(&args.config);
             for pkg_name in ponos_to_manipulate(&config, &ponos) {
                 let pono_definition = config.ponos.get(&pkg_name).unwrap();
 
@@ -188,6 +162,7 @@ fn main() {
             }
         }
         Commands::List => {
+            let config = load_config(&args.config);
             println!("Ponos:");
             for (package, pono_definition) in config.ponos.iter() {
                 println!("  {}: {}", package, pono_definition.source);
@@ -213,6 +188,39 @@ impl Display for PonoError {
             PonoError::Unhandled(msg) => write!(f, "{}", msg),
         }
     }
+}
+
+fn load_config(config_arg: &Option<String>) -> Configuration {
+    let config = config_arg.clone().unwrap_or("pono.toml".to_string());
+    let config_path = path(&config);
+    let toml_content = match std::fs::read_to_string(&config_path) {
+        Ok(content) => content,
+        Err(err) => {
+            println!("Failed to read the {} file", config);
+            println!("Reason: {}", err);
+            println!("Debugging:");
+            println!(" - Check if file exists and is accessible (using ls -la)");
+            std::process::exit(1);
+        }
+    };
+
+    let maybe_config: Option<Configuration> = match toml::from_str(&toml_content) {
+        Ok(config) => Some(config),
+        Err(err) => {
+            println!("Invalid pono configuration file");
+            println!("Reason: {}", err);
+            println!("Debugging:");
+            println!(" - Check if the file is a valid TOML file");
+            println!(" - Check if the file has the correct format");
+            None
+        }
+    };
+
+    if maybe_config.is_none() {
+        std::process::exit(1);
+    }
+
+    return maybe_config.unwrap();
 }
 
 fn validate_package(package: &PonoDefinition) -> Result<(), PonoError> {
