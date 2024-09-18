@@ -70,6 +70,15 @@ You can install **pono** using [Nix](https://nixos.org/):
 
 ```bash
 nix profile install github:cristianoliveira/pono#pono
+
+## After Installation
+
+Enable auto-completion for the **pono** CLI by adding the following to your shell configuration file:
+
+```bash
+if command -v pono &> /dev/null; then
+  eval "$(pono completions zsh)"
+fi
 ```
 
 ## Usage

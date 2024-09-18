@@ -1,10 +1,13 @@
-use clap::{Parser, Subcommand};
+use clap::{CommandFactory, Parser, Subcommand};
+use clap_complete::{generate, Shell};
 use serde::Deserialize;
 use std::collections::HashMap;
 use std::env;
 use std::fmt::{Display, Formatter};
 use std::os::unix::fs::symlink;
 use std::path::PathBuf;
+
+pub const CLI_NAME: &str = "pono";
 
 /// pono - pack and organize symlinks once
 #[derive(Parser, Debug)]
@@ -38,6 +41,9 @@ enum Commands {
     },
     /// List all ponos in the configuration
     List,
+
+    /// Generate autocopletion based in $SHELL or the given shell
+    Completions { shell: Option<Shell> },
 }
 
 // Configuration file format
@@ -167,6 +173,34 @@ fn main() {
             for (package, pono_definition) in config.ponos.iter() {
                 println!("  {}: {}", package, pono_definition.source);
             }
+        }
+        Commands::Completions { shell } => {
+            let current_shell = shell.unwrap_or_else(|| {
+                let shell_in_env = env::var("SHELL").unwrap_or("".to_string());
+                let env_shell = if shell_in_env.contains("bash") {
+                    Some(Shell::Bash)
+                } else if shell_in_env.contains("zsh") {
+                    Some(Shell::Zsh)
+                } else if shell_in_env.contains("fish") {
+                    Some(Shell::Fish)
+                } else {
+                    None
+                };
+
+                if env_shell.is_none() {
+                    println!("Pono doesn't support the current shell {}", shell_in_env);
+                    std::process::exit(1);
+                } else {
+                    env_shell.unwrap()
+                }
+            });
+
+            generate(
+                current_shell,
+                &mut <Args as CommandFactory>::command(),
+                CLI_NAME,
+                &mut std::io::stdout(),
+            )
         }
     }
 }
