@@ -64,26 +64,21 @@ You can install **pono** using [Cargo](https://doc.rust-lang.org/cargo/):
 cargo install pono
 ```
 
-### With Nix
+# After Installation
 
-You can install **pono** using [Nix](https://nixos.org/):
-
-```bash
-nix profile install github:cristianoliveira/pono#pono
-
-## After Installation
-
-Enable auto-completion for the **pono** CLI by adding the following to your shell configuration file:
+Enable pono completions for your shell by adding the following to your shell configuration file:
 
 ```bash
 if command -v pono &> /dev/null; then
-  eval "$(pono completions zsh)"
+  eval "$(pono completions)" ## or $(pono completions <shell>)
 fi
 ```
 
+Check `pono --help` for more information.
+
 ## Usage
 
-The **pono** CLI allows you to enable, disable, and verify symlinks based on a TOML configuration file.
+The **pono** CLI allows you to install, remove, and check symlinks based on a TOML configuration file.
 
 ### Commands
 
