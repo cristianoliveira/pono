@@ -38,12 +38,14 @@ enum Commands {
         ponos: Option<Vec<String>>,
     },
     /// Display the status of all ponos
+    #[clap(visible_alias = "st")]
     Status {
         /// Optional list of ponos to check (default: all)
         #[clap(value_parser(suggest_ponos()))]
         ponos: Option<Vec<String>>,
     },
     /// List all ponos in the configuration
+    #[clap(visible_alias = "ls")]
     List,
 
     /// Generate autocompletion based on $SHELL or the specified shell
