@@ -69,18 +69,14 @@ fn main() {
                     Ok(_) => (),
                     Err(PonoError::TargetAlreadyExists(err)) => {
                         if let Commands::Enable { .. } = args.command {
-                            print!("{}", RED);
-                            println!("Invalid ponos: {}", pkg_name);
-                            println!("Reason: {}", err);
-                            print!("{}", RESET);
+                            println!("{}Invalid ponos: {}", RED, pkg_name);
+                            println!("Reason: {}{}", err, RESET);
                             std::process::exit(1);
                         }
                     }
                     Err(err) => {
-                        print!("{}", RED);
-                        println!("Invalid pono: {}", pkg_name);
-                        println!("Reason: {}", err);
-                        print!("{}", RESET);
+                        println!("{}Invalid pono: {}", RED, pkg_name);
+                        println!("Reason: {}{}", err, RESET);
                         std::process::exit(1);
                     }
                 }
@@ -125,9 +121,7 @@ fn main() {
                 match std::fs::remove_file(&pono_definition.target) {
                     Ok(_) => println!("Unlinked pono: {}", pkg_name),
                     Err(err) => {
-                        print!("{}", RED);
-                        println!("Failed to unlink pono: {}", err);
-                        print!("{}", RESET);
+                        println!("{} Failed to unlink pono: {}", RED, err);
                         std::process::exit(1);
                     }
                 }
@@ -144,17 +138,17 @@ fn main() {
 
                 match check_package(&pono_definition) {
                     Ok(_) => {
-                        print!("{}", GREEN);
-                        println!("  {} {} (linked)", pkg_name, pono_definition.target);
+                        println!(
+                            "{}  {} {} (linked) {}",
+                            GREEN, pkg_name, pono_definition.target, RESET
+                        );
                     }
                     Err(err) => {
-                        print!("{}", RED);
-                        println!("  {} {} (broken)", pkg_name, pono_definition.target);
-                        println!("  Reason: {}", err);
+                        println!("{}  {} {} (broken)", RED, pkg_name, pono_definition.target);
+                        println!("  Reason: {} {}", err, RESET);
                         has_error = true;
                     }
                 };
-                print!("{}", RESET);
             }
 
             if has_error {
@@ -366,21 +360,19 @@ fn ponos_to_manipulate(config: &Configuration, ponos: &Option<Vec<String>>) -> V
     config
         .ponos
         .keys()
-        .filter(|p| contain_package(ponos, p))
+        .filter(|p| {
+            if ponos.is_none() {
+                return true;
+            }
+
+            if let Some(ref pckgs) = ponos {
+                if pckgs.contains(&p.to_string()) {
+                    return true;
+                }
+            }
+
+            false
+        })
         .map(|s| s.to_string())
         .collect()
-}
-
-fn contain_package(ponos: &Option<Vec<String>>, package: &str) -> bool {
-    if ponos.is_none() {
-        return true;
-    }
-
-    if let Some(ref pckgs) = ponos {
-        if pckgs.contains(&package.to_string()) {
-            return true;
-        }
-    }
-
-    false
 }
