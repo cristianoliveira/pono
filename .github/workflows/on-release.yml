@@ -2,70 +2,128 @@ name: Release tag
 
 on:
   workflow_dispatch:
+    inputs:
+      tag_name:
+        description: 'The tag to release artifacts to'
+        required: true
+        default: ''
   release:
     types: [created]
 
 jobs:
-  build_release_osx:
-    env:
-      TARGET: x86_64-apple-darwin
-      RELEASE_TAG: ${{ github.event.release.tag_name }}
-
-    runs-on: macos-latest
-
-    steps:
-      - uses: actions/checkout@v3
-
-      - name: Create artifacts folder
-        run: mkdir artifacts
-
-      - name: Create artifacts for darwin
-        run: sh scripts/ci.sh
-
-      - name: Upload binaries to release
-        uses: svenstaro/upload-release-action@v2
-        with:
-          repo_token: ${{ secrets.GITHUB_TOKEN }}
-          file: pono-${{ env.RELEASE_TAG }}-${{ env.TARGET }}.tar.gz
-          asset_name: pono-${{ env.RELEASE_TAG }}-${{ env.TARGET }}.tar.gz
-          tag: ${{ github.ref }}
-          overwrite: true
-
-  build_release_linux:
-    env:
-      TARGET: x86_64-unknown-linux-gnu
-      RELEASE_TAG: ${{ github.event.release.tag_name }}
-
+  upload-artifacts:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v3
+      # Step 1: Checkout the repository
+      - name: Checkout repository
+        uses: actions/checkout@v3
 
-      - name: Create artifacts folder
-        run: mkdir artifacts
+      # Step 2: Set up Git to fetch tags
+      - name: Fetch tags
+        run: |
+          git fetch --tags
+          git checkout ${{ github.event.inputs.tag_name }}
 
-      - name: Create artifacts for linux
-        run: sh scripts/ci.sh
+      # Step 3: Build the project (if necessary)
+      # Add build steps here if required, e.g., compiling code or generating files.
+      # - run: ./build-script.sh
 
-      - name: Upload binaries to release
-        uses: svenstaro/upload-release-action@v2
+      # Step 4: Upload artifacts
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v3
         with:
-          repo_token: ${{ secrets.GITHUB_TOKEN }}
-          file: pono-${{ env.RELEASE_TAG }}-${{ env.TARGET }}.tar.gz
-          asset_name: pono-${{ env.RELEASE_TAG }}-${{ env.TARGET }}.tar.gz
-          tag: ${{ github.ref }}
-          overwrite: true
+          name: release-artifacts
+          path: ./artifacts/*  # Update this with the path to your generated artifacts
 
-  publish_crates:
-    runs-on: ubuntu-latest
+      # Step 5: Get the release associated with the tag
+      - name: Get release info
+        id: get_release
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const { data: releases } = await github.repos.listReleases({
+              owner: context.repo.owner,
+              repo: context.repo.repo
+            });
+            const release = releases.find(release => release.tag_name === '${{ github.event.inputs.tag_name }}');
+            if (!release) {
+              throw new Error(`Release for tag ${process.env.GITHUB_REF} not found`);
+            }
+            return release;
 
-    steps:
-      - uses: actions/checkout@v3
+      # Step 6: Upload the artifacts to the GitHub release
+      - name: Upload assets to release
+        uses: actions/upload-release-asset@v1
+        with:
+          upload_url: ${{ steps.get_release.outputs.upload_url }}
+          asset_path: ./artifacts/*  # Adjust this path to match your artifacts
+          asset_name: artifact.zip    # Name of the artifact as it will appear in the release
+          asset_content_type: application/zip
 
-      - name: Build
-        run: cargo build
+  # build_release_osx:
+  #   env:
+  #     TARGET: x86_64-apple-darwin
+  #     RELEASE_TAG: ${{ github.event.release.tag_name }}
+  #
+  #   runs-on: macos-latest
+  #
+  #   steps:
+  #     - uses: actions/checkout@v3
+  #
+  #     - name: Create artifacts folder
+  #       run: mkdir artifacts
+  #
+  #     - name: Create artifacts folder
+  #       run: mkdir artifacts
+  #
+  #     - name: Create artifacts for darwin
+  #       run: sh scripts/ci.sh
+  #
+  #     - name: Upload binaries to release
+  #       uses: svenstaro/upload-release-action@v2
+  #       with:
+  #         repo_token: ${{ secrets.GITHUB_TOKEN }}
+  #         file: pono-${{ env.RELEASE_TAG }}-${{ env.TARGET }}.tar.gz
+  #         asset_name: pono-${{ env.RELEASE_TAG }}-${{ env.TARGET }}.tar.gz
+  #         tag: ${{ github.ref }}
+  #         overwrite: true
 
-      - name: Publish crate
-        run: cargo publish --token ${CRATES_TOKEN}
-        env:
-          CRATES_TOKEN: ${{ secrets.CRATES_TOKEN }}
+  # build_release_linux:
+  #   env:
+  #     TARGET: x86_64-unknown-linux-gnu
+  #     RELEASE_TAG: ${{ github.event.release.tag_name }}
+  #
+  #   runs-on: ubuntu-latest
+  #
+  #   steps:
+  #     - uses: actions/checkout@v3
+  #
+  #     - name: Create artifacts folder
+  #       run: mkdir artifacts
+  #
+  #     - name: Create artifacts for linux
+  #       run: sh scripts/ci.sh
+  #
+  #     - name: Upload binaries to release
+  #       uses: svenstaro/upload-release-action@v2
+  #       with:
+  #         repo_token: ${{ secrets.GITHUB_TOKEN }}
+  #         file: pono-${{ env.RELEASE_TAG }}-${{ env.TARGET }}.tar.gz
+  #         asset_name: pono-${{ env.RELEASE_TAG }}-${{ env.TARGET }}.tar.gz
+  #         tag: ${{ github.ref }}
+  #         overwrite: true
+  #
+  # publish_crates:
+  #   runs-on: ubuntu-latest
+  #
+  #   steps:
+  #     - uses: actions/checkout@v3
+  #
+  #     - name: Build
+  #       run: cargo build
+  #
+  #     - name: Publish crate
+  #       run: cargo publish --token ${CRATES_TOKEN}
+  #       env:
+  #         CRATES_TOKEN: ${{ secrets.CRATES_TOKEN }}
