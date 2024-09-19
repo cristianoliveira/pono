@@ -1,4 +1,4 @@
-name: On release
+name: Release tag
 
 on:
   workflow_dispatch:
@@ -63,7 +63,7 @@ jobs:
       - uses: actions/checkout@v3
 
       - name: Build
-        run: make build
+        run: cargo build
 
       - name: Publish crate
         run: cargo publish --token ${CRATES_TOKEN}
