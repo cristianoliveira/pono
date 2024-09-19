@@ -20,14 +20,14 @@ jobs:
         run: mkdir artifacts
 
       - name: Create artifacts for darwin
-        run: sh ci/script.sh
+        run: sh scripts/ci.sh
 
       - name: Upload binaries to release
         uses: svenstaro/upload-release-action@v2
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
-          file: funzzy-${{ env.RELEASE_TAG }}-${{ env.TARGET }}.tar.gz
-          asset_name: funzzy-${{ env.RELEASE_TAG }}-${{ env.TARGET }}.tar.gz
+          file: pono-${{ env.RELEASE_TAG }}-${{ env.TARGET }}.tar.gz
+          asset_name: pono-${{ env.RELEASE_TAG }}-${{ env.TARGET }}.tar.gz
           tag: ${{ github.ref }}
           overwrite: true
 
@@ -45,14 +45,14 @@ jobs:
         run: mkdir artifacts
 
       - name: Create artifacts for linux
-        run: sh ci/script.sh
+        run: sh scripts/ci.sh
 
       - name: Upload binaries to release
         uses: svenstaro/upload-release-action@v2
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
-          file: funzzy-${{ env.RELEASE_TAG }}-${{ env.TARGET }}.tar.gz
-          asset_name: funzzy-${{ env.RELEASE_TAG }}-${{ env.TARGET }}.tar.gz
+          file: pono-${{ env.RELEASE_TAG }}-${{ env.TARGET }}.tar.gz
+          asset_name: pono-${{ env.RELEASE_TAG }}-${{ env.TARGET }}.tar.gz
           tag: ${{ github.ref }}
           overwrite: true
 
