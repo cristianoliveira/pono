@@ -32,11 +32,13 @@ enum Commands {
         ponos: Option<Vec<String>>,
     },
     /// Display the status of all ponos
+    #[clap(visible_alias = "st")]
     Status {
         /// Optional list of ponos to check (default: all)
         ponos: Option<Vec<String>>,
     },
     /// List all ponos in the configuration
+    #[clap(visible_alias = "ls")]
     List,
 }
 
