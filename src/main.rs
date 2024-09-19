@@ -1,10 +1,14 @@
-use clap::{Parser, Subcommand};
+use clap::builder::PossibleValue;
+use clap::{CommandFactory, Parser, Subcommand, ValueHint};
+use clap_complete::{generate, Shell};
 use serde::Deserialize;
 use std::collections::HashMap;
 use std::env;
 use std::fmt::{Display, Formatter};
 use std::os::unix::fs::symlink;
 use std::path::PathBuf;
+
+pub const CLI_NAME: &str = "pono";
 
 /// pono - pack and organize symlinks once
 #[derive(Parser, Debug)]
@@ -15,7 +19,7 @@ struct Args {
     command: Commands,
 
     /// Optional config file path (default: pono.toml)
-    #[clap(short, long)]
+    #[clap(short, long, value_hint = ValueHint::FilePath)]
     config: Option<String>,
 }
 
@@ -24,20 +28,26 @@ enum Commands {
     /// Enables all or a space-separated list of ponos
     Enable {
         /// Optional list of ponos to enable (default: all)
+        #[clap(value_parser(suggest_ponos()))]
         ponos: Option<Vec<String>>,
     },
     /// Disable all or a space-separated list of ponos
     Disable {
         /// Optional list of ponos to disable (default: all)
+        #[clap(value_parser(suggest_ponos()))]
         ponos: Option<Vec<String>>,
     },
     /// Display the status of all ponos
     Status {
         /// Optional list of ponos to check (default: all)
+        #[clap(value_parser(suggest_ponos()))]
         ponos: Option<Vec<String>>,
     },
     /// List all ponos in the configuration
     List,
+
+    /// Generate autocompletion based on $SHELL or the specified shell
+    Completions { shell: Option<Shell> },
 }
 
 // Configuration file format
@@ -56,13 +66,31 @@ const GREEN: &str = "\x1b[32m";
 const RED: &str = "\x1b[31m";
 const RESET: &str = "\x1b[0m";
 
+fn suggest_ponos() -> Vec<PossibleValue> {
+    let config_path = env::args()
+        .collect::<Vec<String>>()
+        .into_iter()
+        .find(|s| s.ends_with(".toml"));
+    let config = load_config(config_path);
+    match config {
+        Ok(cfg) => cfg
+            .ponos
+            .keys()
+            .map(|s| PossibleValue::new(Into::<String>::into(s)))
+            .collect(),
+        Err(_) => {
+            return vec![];
+        }
+    }
+}
+
 fn main() {
     let args = Args::parse();
 
     // Validate all ponos before performing filesystem operations
     match &args.command {
         Commands::Enable { ponos } | Commands::Disable { ponos } => {
-            let config = load_config(&args.config);
+            let config = handle_config_error(load_config(args.config.clone()));
             for pkg_name in ponos_to_manipulate(&config, &ponos) {
                 let pono_definition = config.ponos.get(&pkg_name).unwrap();
                 match validate_package(&pono_definition) {
@@ -88,7 +116,7 @@ fn main() {
     match args.command {
         Commands::Enable { ponos } => {
             // Commands with side effects
-            let config = load_config(&args.config);
+            let config = handle_config_error(load_config(args.config));
             println!("Linking ponos");
             for pkg_name in ponos_to_manipulate(&config, &ponos) {
                 let pono_definition = config.ponos.get(&pkg_name).unwrap();
@@ -115,7 +143,7 @@ fn main() {
             }
         }
         Commands::Disable { ponos } => {
-            let config = load_config(&args.config);
+            let config = handle_config_error(load_config(args.config));
             for pkg_name in ponos_to_manipulate(&config, &ponos) {
                 let pono_definition = config.ponos.get(&pkg_name).unwrap();
                 match std::fs::remove_file(&pono_definition.target) {
@@ -132,7 +160,7 @@ fn main() {
         Commands::Status { ponos } => {
             println!("Status:");
             let mut has_error = false;
-            let config = load_config(&args.config);
+            let config = handle_config_error(load_config(args.config));
             for pkg_name in ponos_to_manipulate(&config, &ponos) {
                 let pono_definition = config.ponos.get(&pkg_name).unwrap();
 
@@ -156,16 +184,45 @@ fn main() {
             }
         }
         Commands::List => {
-            let config = load_config(&args.config);
+            let config = handle_config_error(load_config(args.config));
             println!("Ponos:");
             for (package, pono_definition) in config.ponos.iter() {
                 println!("  {}: {}", package, pono_definition.source);
             }
         }
+        Commands::Completions { shell } => {
+            let current_shell = shell.unwrap_or_else(|| {
+                let shell_in_env = env::var("SHELL").unwrap_or("".to_string());
+                let env_shell = if shell_in_env.contains("bash") {
+                    Some(Shell::Bash)
+                } else if shell_in_env.contains("zsh") {
+                    Some(Shell::Zsh)
+                } else if shell_in_env.contains("fish") {
+                    Some(Shell::Fish)
+                } else {
+                    None
+                };
+
+                if env_shell.is_none() {
+                    println!("Pono doesn't support the current shell {}", shell_in_env);
+                    std::process::exit(1);
+                } else {
+                    env_shell.unwrap()
+                }
+            });
+
+            generate(
+                current_shell,
+                &mut <Args as CommandFactory>::command(),
+                CLI_NAME,
+                &mut std::io::stdout(),
+            )
+        }
     }
 }
 
 enum PonoError {
+    ConfigError(String, String),
     NotFound(String),
     NotSymlink(String),
     TargetAlreadyExists(String),
@@ -175,6 +232,7 @@ enum PonoError {
 impl Display for PonoError {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         match self {
+            PonoError::ConfigError(msg, _) => write!(f, "(config-error) {}", msg),
             PonoError::NotFound(msg) => write!(f, "(not-found) {}", msg),
             PonoError::NotSymlink(msg) => write!(f, "(non-pono_definition) {}", msg),
             PonoError::LinkMismatch(msg) => write!(f, "(link-mismatch) {}", msg),
@@ -184,37 +242,44 @@ impl Display for PonoError {
     }
 }
 
-fn load_config(config_arg: &Option<String>) -> Configuration {
-    let config = config_arg.clone().unwrap_or("pono.toml".to_string());
+fn handle_config_error(res: Result<Configuration, PonoError>) -> Configuration {
+    match res {
+        Ok(config) => return config,
+        Err(PonoError::ConfigError(err, config)) => {
+            println!("Failed to read the {} file", config);
+            println!("Reason: (config-error) {}", err);
+            println!("Debugging:");
+            println!(" - Check if file exists and is accessible (using ls -la)");
+            println!(" - Check if the file is a valid TOML file");
+            println!(" - Check if the file has the correct format");
+            std::process::exit(1);
+            #[allow(unreachable_code)]
+            Configuration {
+                ponos: HashMap::new(),
+            }
+        }
+        _ => todo!("This shouldn't happen. Open an issue on GitHub"),
+    }
+}
+
+fn load_config(config_arg: Option<String>) -> Result<Configuration, PonoError> {
+    let config = config_arg.unwrap_or("pono.toml".to_string());
     let config_path = path(&config);
     let toml_content = match std::fs::read_to_string(&config_path) {
         Ok(content) => content,
         Err(err) => {
-            println!("Failed to read the {} file", config);
-            println!("Reason: {}", err);
-            println!("Debugging:");
-            println!(" - Check if file exists and is accessible (using ls -la)");
-            std::process::exit(1);
+            return Err(PonoError::ConfigError(format!("{}", err), config));
         }
     };
 
     let maybe_config: Option<Configuration> = match toml::from_str(&toml_content) {
         Ok(config) => Some(config),
         Err(err) => {
-            println!("Invalid pono configuration file");
-            println!("Reason: {}", err);
-            println!("Debugging:");
-            println!(" - Check if the file is a valid TOML file");
-            println!(" - Check if the file has the correct format");
-            None
+            return Err(PonoError::ConfigError(format!("{}", err), config));
         }
     };
 
-    if maybe_config.is_none() {
-        std::process::exit(1);
-    }
-
-    return maybe_config.unwrap();
+    Ok(maybe_config.unwrap())
 }
 
 fn validate_package(package: &PonoDefinition) -> Result<(), PonoError> {

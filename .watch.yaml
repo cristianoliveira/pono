@@ -3,13 +3,25 @@
 #
 # list here all the events and the commands that it should execute
 
+- name: build project
+  run: 
+    - cargo build
+  change: 
+    - Cargo.toml
+    - build.rs
+    - src/**
+    - tests/**
+  run_on_init: true
+
 - name: quick checks
   run: 
+    - cargo build
     - cargo test
   change: 
     - Cargo.toml
     - src/**
     - tests/**
+  run_on_init: true
 
 - name: lint & formatters
   run: 
