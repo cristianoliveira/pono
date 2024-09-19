@@ -50,11 +50,15 @@ jobs:
             if (!release) {
               throw new Error(`Release for tag ${process.env.GITHUB_REF} not found`);
             }
+            console.log(release);
             return release;
+
+      - name: Check URL
+        run: echo \"URL ${{ steps.get_release.outputs.upload_url }}\"
 
       # Step 6: Upload the artifacts to the GitHub release
       - name: Upload assets to release
-        uses: actions/upload-release-asset@v1
+        uses: svenstaro/upload-release-action@v2
         with:
           upload_url: ${{ steps.get_release.outputs.upload_url }}
           asset_path: ./artifacts/*  # Adjust this path to match your artifacts
