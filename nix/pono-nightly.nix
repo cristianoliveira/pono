@@ -7,7 +7,7 @@ rustPlatform.buildRustPackage {
   ## build with local source
   src = ../.;
 
-  cargoHash = "sha256-1ly6iMew30MRIiyr/7umWMDiEW2cIiWA1t5rETiBBWI=";
+  cargoHash = "sha256-nDtkKPd0T5+kDc9hjd8rTAZEX2fc0uI3W4IUbf+ag1s=";
 
   buildInputs = lib.optionals stdenv.isDarwin [
     darwin.apple_sdk.frameworks.CoreServices
