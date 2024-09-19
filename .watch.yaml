@@ -21,6 +21,7 @@
     - Cargo.toml
     - src/**
     - tests/**
+  run_on_init: true
 
 - name: lint & formatters
   run: 
