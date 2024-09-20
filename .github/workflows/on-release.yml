@@ -12,6 +12,12 @@ on:
 
 jobs:
   upload-artifacts:
+    env:
+      TARGET: x86_64-apple-darwin
+      RELEASE_TAG: ${{ github.event.release.tag_name || github.event.inputs.tag_name }}
+
+    if: github.event_name != 'release'
+
     runs-on: ubuntu-latest
 
     steps:
@@ -23,11 +29,12 @@ jobs:
       - name: Fetch tags
         run: |
           git fetch --tags
-          git checkout ${{ github.event.inputs.tag_name }}
+          git checkout ${{ env.RELEASE_TAG }}
 
       # Step 3: Build the project (if necessary)
       # Add build steps here if required, e.g., compiling code or generating files.
-      # - run: ./build-script.sh
+      - name: Build targets
+        run: sh scripts/build-artifacts.sh
 
       # Step 4: Upload artifacts
       - name: Upload artifacts
@@ -50,17 +57,18 @@ jobs:
             if (!release) {
               throw new Error(`Release for tag ${process.env.GITHUB_REF} not found`);
             }
-            console.log(release);
-            return release;
+            console.log(Object.keys(release));
+            return release; // return as string
 
-      - name: Check URL
-        run: echo \"URL ${{ steps.get_release.outputs.upload_url }}\"
+      - name: Check URL - results
+        run: |
+           echo '${{ fromJSON(steps.get_release.outputs.result).upload_url }}'
 
       # Step 6: Upload the artifacts to the GitHub release
       - name: Upload assets to release
         uses: svenstaro/upload-release-action@v2
         with:
-          upload_url: ${{ steps.get_release.outputs.upload_url }}
+          upload_url: ${{ fromJSON(steps.get_release.outputs.result).upload_url }}
           asset_path: ./artifacts/*  # Adjust this path to match your artifacts
           asset_name: artifact.zip    # Name of the artifact as it will appear in the release
           asset_content_type: application/zip
@@ -68,7 +76,7 @@ jobs:
   # build_release_osx:
   #   env:
   #     TARGET: x86_64-apple-darwin
-  #     RELEASE_TAG: ${{ github.event.release.tag_name }}
+  #     RELEASE_TAG: ${{ github.event.release.tag_name || github.event.inputs.tag_name }}
   #
   #   runs-on: macos-latest
   #
