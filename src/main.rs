@@ -188,7 +188,8 @@ fn main() {
         Commands::List => {
             let config = handle_config_error(load_config(args.config));
             println!("Ponos:");
-            for (package, pono_definition) in config.ponos.iter() {
+            for package in ponos_to_manipulate(&config, &None) {
+                let pono_definition = config.ponos.get(&package).unwrap();
                 println!("  {}: {}", package, pono_definition.source);
             }
         }
@@ -424,7 +425,7 @@ fn path(path: &str) -> String {
 }
 
 fn ponos_to_manipulate(config: &Configuration, ponos: &Option<Vec<String>>) -> Vec<String> {
-    config
+    let mut list: Vec<String> = config
         .ponos
         .keys()
         .filter(|p| {
@@ -441,5 +442,7 @@ fn ponos_to_manipulate(config: &Configuration, ponos: &Option<Vec<String>>) -> V
             false
         })
         .map(|s| s.to_string())
-        .collect()
+        .collect();
+    list.sort();
+    list
 }
