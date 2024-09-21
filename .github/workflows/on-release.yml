@@ -34,7 +34,7 @@ jobs:
       # Step 3: Build the project (if necessary)
       # Add build steps here if required, e.g., compiling code or generating files.
       - name: Build targets
-        run: ls -la scripts && sh scripts/build-artifacts.sh
+        run: ls -la scripts && scripts/build-artifacts.sh
 
       # Step 4: Upload artifacts
       - name: Upload artifacts
