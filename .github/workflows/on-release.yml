@@ -26,10 +26,10 @@ jobs:
         uses: actions/checkout@v3
 
       # Step 2: Set up Git to fetch tags
-      - name: Fetch tags
-        run: |
-          git fetch --tags
-          git checkout ${{ env.RELEASE_TAG }}
+      # - name: Fetch tags
+      #   run: |
+      #     git fetch --tags
+      #     git checkout ${{ env.RELEASE_TAG }}
 
       # Step 3: Build the project (if necessary)
       # Add build steps here if required, e.g., compiling code or generating files.
