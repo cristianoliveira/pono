@@ -18,4 +18,3 @@ tar czf "$ARTIFACT" pkg
 
 # sanity check the file type
 file pkg/pono
-
