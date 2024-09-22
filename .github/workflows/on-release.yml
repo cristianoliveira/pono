@@ -11,6 +11,33 @@ on:
     types: [created]
 
 jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        target: 
+          - x86_64-unknown-linux-gnu
+          - aarch64-unknown-linux-gnu
+          # - x86_64-apple-darwin
+          # - aarch64-apple-darwin
+          # - x86_64-pc-windows-msvc
+          # - i686-pc-windows-msvc
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Install `cross`
+        run: cargo install cross
+
+      - name: Build for ${{ matrix.target }}
+        run: cross build --release --target ${{ matrix.target }}
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: ${{ matrix.target }}-binary
+          path: target/${{ matrix.target }}/release/your_binary_name
+
   upload-artifacts:
     env:
       TARGET: x86_64-apple-darwin
@@ -33,8 +60,8 @@ jobs:
 
       # Step 3: Build the project (if necessary)
       # Add build steps here if required, e.g., compiling code or generating files.
-      - name: Build targets
-        run: ls -la scripts && scripts/build-artifacts.sh
+      # - name: Build targets
+      #   run: ls -la scripts && scripts/build-artifacts.sh
 
       # Step 4: Upload artifacts
       - name: Upload artifacts
