@@ -33,10 +33,13 @@
             pkgs.rustup
             pkgs.cargo
             pkgs.rustfmt
-            pkgs.gcc
 
             ## System deps
             pkgs.libiconv
+
+            ## Cross build deps
+            pkgs.docker
+            pkgs.cargo-cross
 
             ## Dev deps
             cpkgs.funzzy
