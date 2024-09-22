@@ -17,6 +17,7 @@
           buildInputs = [ 
             # Build deps
             pkgs.cargo
+            pkgs.rustc
             pkgs.rustfmt
 
             ## System deps
@@ -30,19 +31,12 @@
         devShells.cross-build = pkgs.mkShell {
           buildInputs = [ 
             # Build deps
-            pkgs.rustup
             pkgs.cargo
+            pkgs.rustc
             pkgs.rustfmt
 
             ## System deps
             pkgs.libiconv
-
-            ## Cross build deps
-            pkgs.docker
-            pkgs.cargo-cross
-
-            ## Dev deps
-            cpkgs.funzzy
           ];
 
           shellHook = ''
