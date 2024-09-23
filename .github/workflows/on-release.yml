@@ -45,73 +45,78 @@ jobs:
           tar czf "$ARTIFACT" pkg
           file pkg/pono
 
-      - name: Upload Artifact
-        uses: actions/upload-artifact@v3
-        with:
-          name: ${{ matrix.target }}-binary
-          path: target/${{ matrix.target }}/release/pono
-
-  upload-artifacts:
-    env:
-      TARGET: x86_64-apple-darwin
-      RELEASE_TAG: ${{ github.event.release.tag_name || github.event.inputs.tag_name }}
-
-    if: github.event_name != 'release'
-
-    runs-on: ubuntu-latest
-
-    steps:
-      # Step 1: Checkout the repository
-      - name: Checkout repository
-        uses: actions/checkout@v3
-
-      # Step 2: Set up Git to fetch tags
-      # - name: Fetch tags
-      #   run: |
-      #     git fetch --tags
-      #     git checkout ${{ env.RELEASE_TAG }}
-
-      # Step 3: Build the project (if necessary)
-      # Add build steps here if required, e.g., compiling code or generating files.
-      # - name: Build targets
-      #   run: ls -la scripts && scripts/build-artifacts.sh
-
-      # Step 4: Upload artifacts
-      - name: Upload artifacts
-        uses: actions/upload-artifact@v3
-        with:
-          name: release-artifacts
-          path: ./artifacts/*  # Update this with the path to your generated artifacts
-
-      # Step 5: Get the release associated with the tag
-      - name: Get release info
-        id: get_release
-        uses: actions/github-script@v6
-        with:
-          script: |
-            const { data: releases } = await github.rest.repos.listReleases({
-              owner: context.repo.owner,
-              repo: context.repo.repo
-            });
-            const release = releases.find(release => release.tag_name === '${{ github.event.inputs.tag_name }}');
-            if (!release) {
-              throw new Error(`Release for tag ${process.env.GITHUB_REF} not found`);
-            }
-            console.log(Object.keys(release));
-            return release; // return as string
-
-      - name: Check URL - results
-        run: |
-           echo '${{ fromJSON(steps.get_release.outputs.result).upload_url }}'
-
       - name: Upload binaries to release
         uses: svenstaro/upload-release-action@v2
+        env:
+          TARGET: ${{ matrix.target }}
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           file: pono-${{ env.RELEASE_TAG }}-${{ env.TARGET }}.tar.gz
           asset_name: pono-${{ env.RELEASE_TAG }}-${{ env.TARGET }}.tar.gz
           tag: ${{ env.RELEASE_TAG }}
           overwrite: true
+
+  # upload-artifacts:
+  #   env:
+  #     TARGET: x86_64-apple-darwin
+  #     RELEASE_TAG: ${{ github.event.release.tag_name || github.event.inputs.tag_name }}
+  #
+  #   if: github.event_name != 'release'
+  #
+  #   runs-on: ubuntu-latest
+  #
+  #   steps:
+  #     # Step 1: Checkout the repository
+  #     - name: Checkout repository
+  #       uses: actions/checkout@v3
+  #
+  #     # Step 2: Set up Git to fetch tags
+  #     # - name: Fetch tags
+  #     #   run: |
+  #     #     git fetch --tags
+  #     #     git checkout ${{ env.RELEASE_TAG }}
+  #
+  #     # Step 3: Build the project (if necessary)
+  #     # Add build steps here if required, e.g., compiling code or generating files.
+  #     # - name: Build targets
+  #     #   run: ls -la scripts && scripts/build-artifacts.sh
+  #
+  #     # Step 4: Upload artifacts
+  #     - name: Upload artifacts
+  #       uses: actions/upload-artifact@v3
+  #       with:
+  #         name: release-artifacts
+  #         path: ./artifacts/*  # Update this with the path to your generated artifacts
+  #
+  #     # Step 5: Get the release associated with the tag
+  #     - name: Get release info
+  #       id: get_release
+  #       uses: actions/github-script@v6
+  #       with:
+  #         script: |
+  #           const { data: releases } = await github.rest.repos.listReleases({
+  #             owner: context.repo.owner,
+  #             repo: context.repo.repo
+  #           });
+  #           const release = releases.find(release => release.tag_name === '${{ github.event.inputs.tag_name }}');
+  #           if (!release) {
+  #             throw new Error(`Release for tag ${process.env.GITHUB_REF} not found`);
+  #           }
+  #           console.log(Object.keys(release));
+  #           return release; // return as string
+  #
+  #     - name: Check URL - results
+  #       run: |
+  #          echo '${{ fromJSON(steps.get_release.outputs.result).upload_url }}'
+  #
+  #     - name: Upload binaries to release
+  #       uses: svenstaro/upload-release-action@v2
+  #       with:
+  #         repo_token: ${{ secrets.GITHUB_TOKEN }}
+  #         file: pono-${{ env.RELEASE_TAG }}-${{ env.TARGET }}.tar.gz
+  #         asset_name: pono-${{ env.RELEASE_TAG }}-${{ env.TARGET }}.tar.gz
+  #         tag: ${{ env.RELEASE_TAG }}
+  #         overwrite: true
 
   # build_release_osx:
   #   env:
