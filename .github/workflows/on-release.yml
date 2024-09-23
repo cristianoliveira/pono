@@ -16,12 +16,11 @@ jobs:
     strategy:
       matrix:
         target: 
-          - x86_64-unknown-linux-gnu
-          - aarch64-unknown-linux-gnu
-          # - x86_64-apple-darwin
-          # - aarch64-apple-darwin
-          # - x86_64-pc-windows-msvc
-          # - i686-pc-windows-msvc
+          - os: x86_64-linux-gnu
+            RUSTFLAGS: "-C linker=aarch64-linux-gnu-gcc"
+          - os: x86_64-linux-musl
+            RUSTFLAGS: "-C linker=aarch64-linux-musl-gcc"
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
@@ -31,12 +30,13 @@ jobs:
           github_access_token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Nix develop
-        run: nix develop
+        run: nix develop .#minimal
 
       - name: Create artifacts for darwin
         env:
           RELEASE_TAG: ${{ github.event.release.tag_name || github.event.inputs.tag_name }}
-          TARGET: ${{ matrix.target }}
+          TARGET: ${{ matrix.target.os }}
+          RUSTFLAGS: ${{ matrix.target.RUSTFLAGS }}
         run: sh scripts/ci.sh
 
       - name: Upload binaries to release

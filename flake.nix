@@ -25,24 +25,19 @@
 
             ## Dev deps
             cpkgs.funzzy
+
+            ## Github deps
+            pkgs.gh
           ];
         };
 
-        devShells.cross-build = pkgs.mkShell {
+        devShells.minimal = pkgs.mkShell {
           buildInputs = [ 
             # Build deps
             pkgs.cargo
             pkgs.rustc
             pkgs.rustfmt
-
-            ## System deps
-            pkgs.libiconv
           ];
-
-          shellHook = ''
-            rustup default stable
-            rustup target add x86_64-unknown-linux-gnu aarch64-unknown-linux-gnu x86_64-apple-darwin aarch64-apple-darwin
-          '';
         };
     });
 }
