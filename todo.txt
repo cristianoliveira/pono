@@ -37,3 +37,5 @@
       Ok(())
   }
   ```
+
+- CONFIG: adds dinamic values to the config file for instance $(which command)
