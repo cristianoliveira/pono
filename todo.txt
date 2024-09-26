@@ -1,28 +1,12 @@
-- VALIDATE configuration file (toml):
-  - if format is valid
-  - if required fields are present (packages)
-  - if packages are valid
-
 -- VALIDATE: atomicity
   - if all packages are valid perform the link/unlink operation
 
 -- VALIDATE packages:
   - are not duplicated. What to do them? (ignore, error, warning)
 
--- VALIDATE source file: 
-  - if exists
-  - if is a file
-  - if is readable
-
--- VALIDATE destination file:
-  - if exists
-  - if is a file
-  - if is writable
-
-
 - GENERATE: config file by scanning a directory and creating a package for each file
 
-- GENERATE: config file with default values
+- GENERATE: config file with default values (common configurations) with `pono init`
 
 - CROSS-SYSTEM:
   example of a symlink creation function that works on both unix and windows
@@ -37,3 +21,5 @@
       Ok(())
   }
   ```
+
+- CONFIG: adds dinamic values to the config file for instance $(which command)
