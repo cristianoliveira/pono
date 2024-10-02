@@ -10,6 +10,14 @@ use std::path::PathBuf;
 
 pub const CLI_NAME: &str = "pono";
 
+// Macro that prints with a given color
+macro_rules! println_color {
+    ($color:expr, $($arg:tt)*) => {
+        println!("{}{}", $color, format_args!($($arg)*));
+        print!("{}", RESET);
+    };
+}
+
 /// pono - pack and organize symlinks once
 #[derive(Parser, Debug)]
 #[command(version, about, long_about = None, arg_required_else_help(true))]
@@ -99,14 +107,14 @@ fn main() {
                     Ok(_) => (),
                     Err(PonoError::TargetAlreadyExists(err)) => {
                         if let Commands::Enable { .. } = args.command {
-                            println!("{}Invalid ponos: {}", RED, pkg_name);
-                            println!("Reason: {}{}", err, RESET);
+                            println_color!(RED, "Invalid ponos: {}", pkg_name);
+                            println_color!(RED, "Reason: {}", err);
                             std::process::exit(1);
                         }
                     }
                     Err(err) => {
-                        println!("{}Invalid pono: {}", RED, pkg_name);
-                        println!("Reason: {}{}", err, RESET);
+                        println_color!(RED, "Invalid pono: {}", pkg_name);
+                        println_color!(RED, "Reason: {}", err);
                         std::process::exit(1);
                     }
                 }
@@ -131,13 +139,15 @@ fn main() {
 
                 match symlink(&src_path, &pono_definition.target) {
                     Ok(_) => {
-                        println!(
-                            "{}  {}: {} (new link)",
-                            GREEN, pkg_name, pono_definition.target
-                        )
+                        println_color!(
+                            GREEN,
+                            "  {}: {} (new link)",
+                            pkg_name,
+                            pono_definition.target
+                        );
                     }
                     Err(err) => {
-                        println!("{}Pono link failed reason: {}", RED, err);
+                        println_color!(RED, "Pono link failed reason: {}", err);
                         std::process::exit(1);
                     }
                 };
@@ -151,7 +161,7 @@ fn main() {
                 match std::fs::remove_file(&pono_definition.target) {
                     Ok(_) => println!("Unlinked pono: {}", pkg_name),
                     Err(err) => {
-                        println!("{} Failed to unlink pono: {}", RED, err);
+                        println_color!(RED, "Failed to unlink pono: {}", err);
                         std::process::exit(1);
                     }
                 }
@@ -168,14 +178,17 @@ fn main() {
 
                 match check_package(&pono_definition) {
                     Ok(_) => {
-                        println!(
-                            "{}  {} {} (linked) {}",
-                            GREEN, pkg_name, pono_definition.target, RESET
+                        println_color!(
+                            GREEN,
+                            "  {} {} (linked) {}",
+                            pkg_name,
+                            pono_definition.target,
+                            RESET
                         );
                     }
                     Err(err) => {
-                        println!("{}  {} {} (broken)", RED, pkg_name, pono_definition.target);
-                        println!("  Reason: {} {}", err, RESET);
+                        println_color!(RED, "  {} {} (broken)", pkg_name, pono_definition.target);
+                        println_color!(RED, "  Reason: {}", err);
                         has_error = true;
                     }
                 };
@@ -250,6 +263,7 @@ fn handle_config_error(res: Result<Configuration, PonoError>) -> Configuration {
         Ok(config) => return config,
         Err(PonoError::ConfigError(err, config)) => {
             println!("Failed to read the {} file", config);
+            print!("{}", RED);
             println!("Reason: (config-error) {}", err);
             println!("Debugging:");
             println!(" - Check if file exists and is accessible (using ls -la)");
