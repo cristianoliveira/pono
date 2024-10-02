@@ -27,3 +27,4 @@
 - VALIDATE: Cyclic Links: 
   Avoid creating symbolic links that point back to themselves or create a loop between directories.
 Link Existence:
+FEAT: add '--expand' flag to expand environment variables
