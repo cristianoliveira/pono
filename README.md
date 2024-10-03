@@ -1,4 +1,4 @@
-# pono - pack and organize symlinks once
+# pono - `p`ack `on`ly `o`nce
 
 [![Crate version](https://img.shields.io/crates/v/pono.svg?)](https://crates.io/crates/pono)
 [![CI checks](https://github.com/cristianoliveira/pono/actions/workflows/on-push.yml/badge.svg)](https://github.com/cristianoliveira/pono/actions/workflows/on-push.yml)
@@ -7,7 +7,7 @@
 
 ## Why?
 
-Let's face it, managing symbolic links with bash scripts sucks because `ln` has poor defaults. The alternative [GNU stow](https://www.gnu.org/software/stow/) does almost what I wanted, but not quite. I wanted a tool that could manage symlinks for multiple packages independent of the source file structure, using a flat configuration. I also need to be able to toogle links on demand to apply different configs.
+Let's face it, managing symbolic links with bash scripts sucks because the source may be missing the target may already exist, etc, etc. The alternative [GNU stow](https://www.gnu.org/software/stow/) does almost what I wanted, but not quite. I wanted a tool that could manage symlinks for multiple packages independent of the source file structure, using a flat configuration. I also need to be able to toogle links on demand to apply different configs, for instance, when testing with different `.env` for different environments.
 
 ## Demo
 
