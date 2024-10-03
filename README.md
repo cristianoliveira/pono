@@ -3,11 +3,17 @@
 [![Crate version](https://img.shields.io/crates/v/pono.svg?)](https://crates.io/crates/pono)
 [![CI checks](https://github.com/cristianoliveira/pono/actions/workflows/on-push.yml/badge.svg)](https://github.com/cristianoliveira/pono/actions/workflows/on-push.yml)
 
-**pono** (__poh-no__ to place/store in latin) is a cli for managing symbolic links in one place inspired by `stow`. Because symbolic links managment in bash script sucks.
+**pono** (__poh-no__ to place/store in Latin) is a CLI for managing symbolic links in one place inspired by `stow`. Because symbolic links management in bash script sucks.
 
 ## Why?
 
-Let's face it, managing symbolic links with bash scripts sucks because the source may be missing the target may already exist, etc, etc. The alternative [GNU stow](https://www.gnu.org/software/stow/) does almost what I wanted, but not quite. I wanted a tool that could manage symlinks for multiple packages independent of the source file structure, using a flat configuration. I also need to be able to toogle links on demand to apply different configs, for instance, when testing with different `.env` for different environments.
+Let's face it, managing symbolic links with bash scripts sucks because the source may be missing the target may already exist, etc, etc. The alternative [GNU stow](https://www.gnu.org/software/stow/) does almost what I wanted, but not quite. I wanted a tool that could manage symlinks for multiple packages independent of the source file structure, using a flat configuration. I also need to be able to toggle links on demand to apply different configs.
+
+Use cases: 
+ - Testing with different `.env` for different environments
+     - `pono toggle develop | stage | live` + with autocompletion!
+ - Dotfiles linking management and checks
+     - `pono enable && pono status` or single "pono" `pono disable nvim`
 
 ## Demo
 
@@ -19,18 +25,17 @@ zsh = { source = "./examples/from/zshrc", target = "./examples/to/.zshrc" }
 ```
 And run
 ```bash
-pono enable -c example/pono.toml
+pono enable
+
 Linking packages
   nvim: ./examples/to/nvim (new link)
   zsh: ./examples/to/.zshrc (new link)
 
 ls -la examples/to                                                                                                                                                     [1:00:35]
 total 0
-drwxr-xr-x 4 cris 128 Sep 14 01:00 .
-drwxr-xr-x 5 cris 160 Sep 14 01:00 ..
+..
 lrwxr-xr-x 1 cris  58 Sep 14 01:00 .zshrc -> /home/cris/pono/./examples/src/zshrc
 lrwxr-xr-x 1 cris  57 Sep 14 01:00 nvim -> /home/cris/pono/./examples/src/nvim
-cr
 ```
 
 ## Features
@@ -44,7 +49,7 @@ cr
 - Supports pattern matching for including or excluding files.
 - Built-in dry-run mode to preview changes before applying them.
 - Verbose mode for detailed output.
-- Manage same link with diffrent source and toogle between them.
+- Manage the same link with different sources and toggle between them.
 
 ## Table of Contents
 
