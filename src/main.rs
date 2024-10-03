@@ -10,6 +10,10 @@ use std::path::PathBuf;
 
 pub const CLI_NAME: &str = "pono";
 
+// ANSI color codes for terminal output
+const GREEN: &str = "\x1b[32m";
+const RED: &str = "\x1b[31m";
+const RESET: &str = "\x1b[0m";
 /// Macro that prints with a given color and automatically resets the color
 /// ```rust
 /// // USAGE
@@ -76,10 +80,6 @@ struct PonoDefinition {
     source: String,
     target: String,
 }
-
-const GREEN: &str = "\x1b[32m";
-const RED: &str = "\x1b[31m";
-const RESET: &str = "\x1b[0m";
 
 fn suggest_ponos() -> Vec<PossibleValue> {
     let config_path = env::args()
