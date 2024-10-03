@@ -10,7 +10,12 @@ use std::path::PathBuf;
 
 pub const CLI_NAME: &str = "pono";
 
-// Macro that prints with a given color
+/// Macro that prints with a given color and automatically resets the color
+/// ```rust
+/// // USAGE
+/// println_color!(RED, "This is red text");
+/// println_color!(GREEN, "This is {} text", "green");
+/// ```
 macro_rules! println_color {
     ($color:expr, $($arg:tt)*) => {
         println!("{}{}", $color, format_args!($($arg)*));
@@ -151,7 +156,6 @@ fn main() {
                         std::process::exit(1);
                     }
                 };
-                print!("{}", RESET);
             }
         }
         Commands::Disable { ponos } => {
@@ -180,10 +184,9 @@ fn main() {
                     Ok(_) => {
                         println_color!(
                             GREEN,
-                            "  {} {} (linked) {}",
+                            "  {} {} (linked)",
                             pkg_name,
-                            pono_definition.target,
-                            RESET
+                            pono_definition.target
                         );
                     }
                     Err(err) => {
