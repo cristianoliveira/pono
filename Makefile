@@ -7,6 +7,10 @@ help: ## Lists the available commands. Add a comment with '##' to describe a com
 .PHONY: test
 test: ## Run all the tests.
 	@cargo test --features "test-all"
+
+.PHONY: fmt
+fmt: ## Formats the code.
+	@cargo fmt -v
 	
 .PHONY: nix-checks
 nix-checks: ## Run a nit check on the nix files.

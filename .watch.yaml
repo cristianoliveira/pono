@@ -15,6 +15,7 @@
 
 - name: quick checks
   run: 
+    - make fmt
     - make test
   change: 
     - Cargo.toml
