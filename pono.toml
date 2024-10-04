@@ -1,3 +1,7 @@
-[ponos]
-nvim = { source = "./examples/source/nvim", target = "./examples/target/nvim" }
-zsh = { source = "./examples/source/zshrc", target = "./examples/target/.zshrc" }
+[ponos."git:pre-commit"]
+source = "./scripts/git-hooks-checks"
+target = ".git/hooks/pre-commit"
+
+[ponos."git:pre-push"]
+source = "./scripts/git-hooks-checks"
+target = ".git/hooks/pre-push"

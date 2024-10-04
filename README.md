@@ -10,10 +10,15 @@
 Let's face it, managing symbolic links with bash scripts sucks because the source may be missing the target may already exist, etc, etc. The alternative [GNU stow](https://www.gnu.org/software/stow/) does almost what I wanted, but not quite. I wanted a tool that could manage symlinks for multiple packages independent of the source file structure, using a flat configuration. I also need to be able to toggle links on demand to apply different configs.
 
 Use cases: 
- - Testing with different `.env` for different environments
-     - `pono toggle develop | stage | live` + with autocompletion!
- - Dotfiles linking management and checks
-     - `pono enable && pono status` or single "pono" `pono disable nvim`
+
+  - Managing enabling/disabling git hooks see pono's pono.toml :)
+    - `pono enable git:pre-commit` or `pono enable git:pre-push`
+
+  - Toggling between different `.env` when developing locally
+    - `pono toggle develop | stage | live` + with autocompletion!
+
+  - Dotfiles linking management and checks
+    - `pono enable && pono status` or single "pono" `pono disable nvim`
 
 ## Demo
 

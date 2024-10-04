@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+
+## Check nix
+echo "Checking nix builds"
+make nix-checks
+make nix-build-local
+
+echo "All good"
