@@ -2,7 +2,7 @@
 
 rustPlatform.buildRustPackage {
   pname = "pono";
-  version = "nightly-20241004";
+  version = "local-20241004";
 
   ## build with local source
   src = ../.;

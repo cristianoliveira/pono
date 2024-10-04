@@ -1,0 +1,28 @@
+#!/usr/bin/env bash
+
+NIGHTLY_VERSION="local-$(date +%Y%m%d)"
+VERSION=${1:-$NIGHTLY_VERSION}
+NIX_FILE=${NIX_MODULE:-"nix/pono-local.nix"}
+
+echo "Bumping version to $VERSION"
+# replace  version = "local-2024-09-16"; within "$NIX_FILE"
+sed -i "s/version = \".*\";/version = \"$VERSION\";/" "$NIX_FILE"
+sed -i 's/sha256-.*=//g' "$NIX_FILE"
+## nix build and pipe the error to a build.log file
+rm -f build.log
+nix build .#pono-local 2> build.log
+
+# Extract the sha256 hash from the build log
+# format
+#   specified: sha256-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=
+#   got:    sha256-crOHNrO4KkHn3kKGlwitirBpsgtAGXpDKBORmpVUKFs=
+SHA256=$(grep "got:" build.log | grep -o "sha256-.*=" | cut -d'-' -f2)
+
+echo "New SHA256: $SHA256"
+
+# replace in cargoHash = "";
+sed -i "s/cargoHash = \".*\";/cargoHash = \"sha256-$SHA256\";/" "$NIX_FILE"
+
+sleep 1
+
+nix build .#pono-local
