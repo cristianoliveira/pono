@@ -34,3 +34,35 @@ fn it_allows_using_environment_variables() -> Result<(), Box<dyn std::error::Err
 
     Ok(())
 }
+
+#[test]
+#[cfg(feature = "test-all")] // use: `make tests`
+fn it_allows_using_tilda_to_express_homedir() -> Result<(), Box<dyn std::error::Error>> {
+    common::cleanup();
+    std::fs::remove_file(
+        std::path::Path::new(std::env::var("HOME")?.as_str()).join("__pono_test__"),
+    )
+    .ok();
+    let mut cmd = Command::cargo_bin(BINARY_NAME)?;
+
+    cmd.arg("-c")
+        .arg("examples/configs/using-environment-variables.toml")
+        .arg("enable")
+        .arg("home");
+
+    cmd.assert().success().stdout(predicate::str::contains(
+        "home  $PWD/examples/from/other -> ~/__pono_test__ (linking)",
+    ));
+
+    let mut cmd = Command::cargo_bin(BINARY_NAME)?;
+    cmd.arg("-c")
+        .arg("examples/configs/using-environment-variables.toml")
+        .arg("disable")
+        .arg("home");
+
+    cmd.assert()
+        .success()
+        .stdout(predicate::str::contains("Unlinked pono: home"));
+
+    Ok(())
+}

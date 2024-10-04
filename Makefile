@@ -4,6 +4,10 @@ help: ## Lists the available commands. Add a comment with '##' to describe a com
 		| sort\
 		| awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
 
+.PHONY: test
+test: ## Run all the tests.
+	@cargo test --features "test-all"
+	
 .PHONY: nix-checks
 nix-checks: ## Run a nit check on the nix files.
 	# used in .github/workflows/on-push-nixbuild.yml

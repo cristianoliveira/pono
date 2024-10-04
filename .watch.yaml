@@ -15,8 +15,7 @@
 
 - name: quick checks
   run: 
-    - cargo build
-    - cargo test
+    - make test
   change: 
     - Cargo.toml
     - src/**

@@ -8,6 +8,9 @@ description = "pono - pack and organize symlinks once"
 license = "MIT"
 repository = "https://github.com/cristianoliveira/pono"
 
+[features]
+test-all = []
+
 [dependencies]
 clap = { version = "4.5.17", features = ["derive", "string"] }
 clap_complete = "4.5.28"
