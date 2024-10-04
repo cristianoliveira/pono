@@ -141,8 +141,9 @@ fn main() {
                     pkg_name, pono_definition.source, pono_definition.target
                 );
                 let src_path = path(&pono_definition.source);
+                let target_path = path(&pono_definition.target);
 
-                match symlink(&src_path, &pono_definition.target) {
+                match symlink(&src_path, &target_path) {
                     Ok(_) => {
                         println_color!(
                             GREEN,
@@ -162,10 +163,13 @@ fn main() {
             let config = handle_config_error(load_config(args.config));
             for pkg_name in ponos_to_manipulate(&config, &ponos) {
                 let pono_definition = config.ponos.get(&pkg_name).unwrap();
-                match std::fs::remove_file(&pono_definition.target) {
+                let target_path = path(&pono_definition.target);
+                match std::fs::remove_file(&target_path) {
                     Ok(_) => println!("Unlinked pono: {}", pkg_name),
                     Err(err) => {
-                        println_color!(RED, "Failed to unlink pono: {}", err);
+                        println_color!(RED, "Failed to unlink pono");
+                        println_color!(RED, " {}: {}", pkg_name, target_path);
+                        println_color!(RED, " Reason: {}", err);
                         std::process::exit(1);
                     }
                 }
@@ -182,12 +186,7 @@ fn main() {
 
                 match check_package(&pono_definition) {
                     Ok(_) => {
-                        println_color!(
-                            GREEN,
-                            "  {} {} (linked)",
-                            pkg_name,
-                            pono_definition.target
-                        );
+                        println_color!(GREEN, "  {} {} (linked)", pkg_name, pono_definition.target);
                     }
                     Err(err) => {
                         println_color!(RED, "  {} {} (broken)", pkg_name, pono_definition.target);
@@ -423,9 +422,10 @@ fn path(path: &str) -> String {
     }
 
     if path.contains("$") {
-        return shellexpand::env(path)
-            .expect("Failed to expand environment variables")
+        let expanded = shellexpand::env(path)
+            .expect(format!("Failed to expand path: {}", path).as_str())
             .into_owned();
+        return expanded;
     }
 
     let pathbuf = PathBuf::from(path);

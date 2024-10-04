@@ -1,0 +1,3 @@
+[ponos]
+"var:env" = { source = "$PWD/examples/from/other", target = "$PWD/examples/to/other"}
+home = { source = "$PWD/examples/from/other", target = "~/__pono_test__"}

@@ -15,8 +15,7 @@
 
 - name: quick checks
   run: 
-    - cargo build
-    - cargo test
+    - make test
   change: 
     - Cargo.toml
     - src/**
@@ -33,8 +32,8 @@
 
 - name: nix flake 
   run: 
-    - nix build .#pono
-    - nix build .#ponoNigthly
+    - make nix-build-local
+    - make nix-build
   change: 
     - Cargo.toml
     - src/**
