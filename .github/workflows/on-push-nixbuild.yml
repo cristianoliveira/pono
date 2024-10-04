@@ -19,7 +19,6 @@ jobs:
         with:
           github_access_token: ${{ secrets.GITHUB_TOKEN }}
 
-      - run: mkdir -p /tmp/fzz
-      - run: nix flake check
-      - run: nix build .#pono --verbose
-      - run: nix build .#pono-nightly --verbose
+      - run: make nix-checks
+      - run: make nix-build-local
+      - run: make nix-build
