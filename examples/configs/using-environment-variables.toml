@@ -1,0 +1,2 @@
+[ponos]
+"var:env" = { source = "$PWD/examples/from/other", target = "$PWD/examples/to/other"}
