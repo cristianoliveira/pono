@@ -27,4 +27,11 @@
 - VALIDATE: Cyclic Links: 
   Avoid creating symbolic links that point back to themselves or create a loop between directories.
 Link Existence:
+
+- COMPLETIONS: sort by most relevant
+
+- DOCS/EXAMPLES example of issues with stow
+  "I recently switched to Nix and used stow before, I always had the issue that stow would create a symlink to a directory if that didn't exist, meaning if an app placed another file into the linked directory it would suddenly be in my dotfiles."
+  https://archive.ph/yNxU1
+
 FEAT: add '--expand' flag to expand environment variables
