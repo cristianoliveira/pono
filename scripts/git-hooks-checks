@@ -2,7 +2,9 @@
 
 ## Check nix
 echo "Checking nix builds"
+
 make nix-checks
 make nix-build-local
+make fmt
 
 echo "All good"
