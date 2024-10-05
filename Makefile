@@ -4,9 +4,17 @@ help: ## Lists the available commands. Add a comment with '##' to describe a com
 		| sort\
 		| awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
 
+.PHONY: build
+build: ## Run a release build.
+	@cargo build --release
+
 .PHONY: test
-test: ## Run all the tests.
+test: fmt ## Run all the tests.
 	@cargo test --features "test-all"
+
+.PHONY: install
+install: test ## Install locally after running tests.
+	@cargo install --path .
 
 .PHONY: fmt
 fmt: ## Formats the code.
