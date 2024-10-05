@@ -2,20 +2,16 @@
 
 rustPlatform.buildRustPackage rec {
   pname = "pono";
-  version = "0.2.0";
+  version = "v0.3.0";
 
   src = fetchFromGitHub {
     owner = "cristianoliveira";
     repo = "pono";
-    rev = "v${version}";
-    hash = "sha256-g3NZ9jf8gZfrhQfHsf+JW5fxB6FgsbGipMasHR1sMyM=";
+    rev = "${version}";
+    hash = "sha256-PYRJwpi+RCEUixDN7/FP0WQdlaFa67QHn3u4qRahLq4=";
   };
 
-  cargoHash = "sha256-qCkKVH1CVKxzhhs5MFbYoJhJ9hSS52H3vZPLHdk/CvM=";
-
-  checkPhase = ''
-    cargo test
-  '';
+  cargoHash = "sha256-BQ7TYVtU87fGPoLHQx2Ouc97BiGT4KyzKzlvNE9e2Jg=";
 
   buildInputs = lib.optionals stdenv.isDarwin [
     darwin.apple_sdk.frameworks.CoreServices
