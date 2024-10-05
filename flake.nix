@@ -13,18 +13,6 @@
       in {
         packages = import ./packages.nix { inherit pkgs system; };
 
-        devShells.default = pkgs.mkShell {
-          buildInputs = [ 
-            # Build deps
-            pkgs.cargo
-            pkgs.rustfmt
-
-            ## System deps
-            pkgs.libiconv
-
-            ## Dev deps
-            cpkgs.funzzy
-          ];
-        };
+        devShells.default = pkgs.callPackage ./shell.nix { inherit pkgs cpkgs; };
     });
 }
