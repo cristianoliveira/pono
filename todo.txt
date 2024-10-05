@@ -39,3 +39,18 @@ FEAT: add '--expand' flag to expand environment variables
 FEAT: allow add pono description and help
 
 FEAT: adds pono groups. Usage: managing dotfiles for osx/linux/windows
+
+IDEA: handle toggle and default ponos. For instance toggle different alacritty configurations
+-transparent/opaque
+```toml
+[ponos.alacritty]
+  [ponos.alacritty.transparent]
+  source = "alacritty-transparent.yml"
+  target = "~/.config/alacritty.yml"
+  default = true
+
+  [ponos.alacritty.opaque]
+  source = "alacritty-opaque.yml"
+  target = "~/.config/alacritty.yml"
+  default = true
+```
