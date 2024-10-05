@@ -7,4 +7,7 @@ make nix-checks
 make nix-build-local
 make fmt
 
+git fetch origin
+git rebase origin/main
+
 echo "All good"
