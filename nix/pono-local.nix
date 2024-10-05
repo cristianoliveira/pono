@@ -2,12 +2,12 @@
 
 rustPlatform.buildRustPackage {
   pname = "pono";
-  version = "local-20241004";
+  version = "local-20241005";
 
   ## build with local source
   src = ../.;
 
-  cargoHash = "sha256-6mdy32QxH5eiif2yxYphIrN7esLaXRHffiBKj0kylZ4=";
+  cargoHash = "sha256-Ge/vlWeWxmjLatnlI+tQMZA9BscCYro7OQjeG4nupEU=";
 
   buildInputs = lib.optionals stdenv.isDarwin [
     darwin.apple_sdk.frameworks.CoreServices
