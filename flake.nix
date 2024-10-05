@@ -9,10 +9,11 @@
     utils.lib.eachDefaultSystem (system:
       let
         pkgs = import nixpkgs { inherit system; };
+        sourcepkgs = import ./packages.nix { inherit pkgs; };
         cpkgs = import copkgs { inherit pkgs; };
       in {
-        packages = import ./packages.nix { inherit pkgs system; };
+        packages = sourcepkgs;
 
-        devShells.default = pkgs.callPackage ./shell.nix { inherit pkgs cpkgs; };
+        devShells.default = pkgs.callPackage ./shell.nix { inherit pkgs cpkgs sourcepkgs; };
     });
 }

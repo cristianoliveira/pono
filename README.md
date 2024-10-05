@@ -80,7 +80,7 @@ cargo install pono
 You can install **pono** using [Nix](https://nixos.org/):
 
 ```bash
-nix profile install github:cristianoliveira/pono#pono
+nix profile install github:cristianoliveira/pono
 ```
 
 # After Installation

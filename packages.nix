@@ -1,5 +1,5 @@
-{ pkgs, system }: 
+{ pkgs }: 
 {
-  pono = pkgs.callPackage ./nix/pono.nix { };
+  default = pkgs.callPackage ./nix/pono.nix { };
   pono-local = pkgs.callPackage ./nix/pono-local.nix { };
 }
