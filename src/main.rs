@@ -212,7 +212,7 @@ fn main() {
                 let pono_definition = config.ponos.get(&package).unwrap();
                 println!("  {}: {}", package, pono_definition.source);
             }
-        },
+        }
         Commands::Toggle { pono } => {
             let config = handle_config_error(load_config(args.config));
             let pono_info = match config.ponos.get(&pono) {
