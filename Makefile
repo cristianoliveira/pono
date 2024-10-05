@@ -34,3 +34,7 @@ nix-build-local: ## Run a local nix build. Used for development and CI.
 nix-build: ## Run a nix build. Used for development and CI.
 	# used in .github/workflows/on-push-nixbuild.yml
 	@nix build .#pono --verbose
+
+.PHONY: nix-release
+nix-release: ## Generate new hash for nix package based on the latest version.
+	scripts/bump-nix
