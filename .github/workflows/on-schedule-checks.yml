@@ -1,10 +1,10 @@
-name: nix build
+name: Periodic checks
 
 on:
-  push:
-    branches: ["main"]
-  pull_request:
-    branches: ["main"]
+  workflow_dispatch:
+  schedule:
+    # Ever 3 hours
+    - cron: '0 */3 * * *'
 
 env:
   CARGO_TERM_COLOR: always
@@ -19,5 +19,8 @@ jobs:
         with:
           github_access_token: ${{ secrets.GITHUB_TOKEN }}
 
-      - run: make nix-checks
-      - run: make nix-build-local
+      - name: Check all flakes
+        run: make nix-checks
+
+      - name: Check main nix flake
+        run: make nix-build
