@@ -2,6 +2,7 @@
 
 [![Crate version](https://img.shields.io/crates/v/pono.svg?)](https://crates.io/crates/pono)
 [![CI checks](https://github.com/cristianoliveira/pono/actions/workflows/on-push.yml/badge.svg)](https://github.com/cristianoliveira/pono/actions/workflows/on-push.yml)
+[![Periodic checks](https://github.com/cristianoliveira/pono/actions/workflows/on-schedule-checks.yml/badge.svg)](https://github.com/cristianoliveira/pono/actions/workflows/on-schedule-checks.yml)
 
 **pono** (__poh-no__ to place/store in Latin) is a CLI for managing symbolic links in one place inspired by `stow`. Because symbolic links management in bash script sucks.
 
