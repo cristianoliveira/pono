@@ -35,4 +35,7 @@ Link Existence:
   https://archive.ph/yNxU1
 
 FEAT: add '--expand' flag to expand environment variables
+
 FEAT: allow add pono description and help
+
+FEAT: adds pono groups. Usage: managing dotfiles for osx/linux/windows
