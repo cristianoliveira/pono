@@ -54,9 +54,10 @@ enum Commands {
         #[clap(value_parser(suggest_ponos()))]
         ponos: Option<Vec<String>>,
     },
-    /// Tooggle the given pono without validation
+    /// Toggle the given pono without validation (backup {target}.bak)
     Toggle {
         /// Required pono to toggle
+        #[clap(value_parser(suggest_ponos()))]
         pono: String,
     },
     /// Display the status of all ponos
