@@ -9,8 +9,8 @@
     utils.lib.eachDefaultSystem (system:
       let
         pkgs = import nixpkgs { inherit system; };
-        sourcepkgs = import ./packages.nix { inherit pkgs; };
         cpkgs = import copkgs { inherit pkgs; };
+        sourcepkgs = import ./packages.nix { inherit pkgs; };
       in {
         packages = sourcepkgs;
 

@@ -79,8 +79,13 @@ cargo install pono
 
 You can install **pono** using [Nix](https://nixos.org/):
 
+Latest version in [releases](github.com/cristianoliveira/pono/releases)
 ```bash
 nix profile install github:cristianoliveira/pono
+```
+Or a nightly version from develop branch
+```bash
+nix profile install github:cristianoliveira/pono#nightly
 ```
 
 # After Installation

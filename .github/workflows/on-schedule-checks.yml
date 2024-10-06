@@ -24,3 +24,6 @@ jobs:
 
       - name: Check main nix flake
         run: make nix-build
+          
+      - name: Check nix flake \#nightly
+        run: make nix-build-nightly

@@ -30,6 +30,11 @@ nix-build-local: ## Run a local nix build. Used for development and CI.
 	# used in .github/workflows/on-push-nixbuild.yml
 	@nix build .#pono-local --verbose
 
+.PHONY: nix-build-nightly
+nix-build-nightly: ## Run a local nix build. Used for development and CI.
+	# used in .github/workflows/on-schedule-checks.yml
+	@nix build .#nightly --verbose
+
 .PHONY: nix-build
 nix-build: ## Run a nix build. Used for development and CI.
 	# used in .github/workflows/on-push-nixbuild.yml
