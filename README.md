@@ -103,7 +103,7 @@ The **pono** CLI allows you to install, remove, and check symlinks based on a TO
 
 - `enable`: Create symbolic links for the defined ponos.
 - `disable`: Remove symbolic links for the defined ponos.
-- `toggle`: Toggle a given ponoa and verify.
+- `toggle`: Toggle a given pono and verify.
 - `status`: Check the status the define ponos.
 - `list`: Display all available ponos from the TOML configuration.
 

@@ -54,6 +54,12 @@ enum Commands {
         #[clap(value_parser(suggest_ponos()))]
         ponos: Option<Vec<String>>,
     },
+    /// Toggle the given pono without validation (backup {target}.bak)
+    Toggle {
+        /// Required pono to toggle
+        #[clap(value_parser(suggest_ponos()))]
+        pono: String,
+    },
     /// Display the status of all ponos
     #[clap(visible_alias = "st")]
     Status {
@@ -207,6 +213,44 @@ fn main() {
                 let pono_definition = config.ponos.get(&package).unwrap();
                 println!("  {}: {}", package, pono_definition.source);
             }
+        }
+        Commands::Toggle { pono } => {
+            let config = handle_config_error(load_config(args.config));
+            let pono_info = match config.ponos.get(&pono) {
+                Some(pono) => pono,
+                _ => {
+                    println!("{}Pono not found {} in ponos list", RED, pono);
+                    println!("Debugging:");
+                    println!(" - Run `pono list` to see the available ponos");
+                    std::process::exit(1);
+                }
+            };
+
+            let src_path = path(&pono_info.source);
+            let target_path = path(&pono_info.target);
+
+            // backup current target {pono}.bak
+            let bak_path = format!("{}.bak", target_path);
+            std::fs::remove_file(&bak_path).ok();
+            match std::fs::rename(&target_path, &bak_path) {
+                Ok(_) => {
+                    println!("{}  {}: {} (backup)", GREEN, pono, bak_path)
+                }
+                Err(err) => {
+                    println!("{}Pono backup failed reason: {}", RED, err);
+                    std::process::exit(1);
+                }
+            };
+
+            match symlink(&src_path, &target_path) {
+                Ok(_) => {
+                    println!("{}  {}: {} (new link)", GREEN, pono, target_path)
+                }
+                Err(err) => {
+                    println!("{}Pono link failed reason: {}", RED, err);
+                    std::process::exit(1);
+                }
+            };
         }
         Commands::Completions { shell } => {
             let current_shell = shell.unwrap_or_else(|| {
