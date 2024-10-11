@@ -14,7 +14,7 @@ rustPlatform.buildRustPackage {
   ];
 
   checkPhase = ''
-    RUST_BACKTRACE=1 cargo test --test '*' -- --nocapture
+    RUST_BACKTRACE=1 cargo test
   '';
 
   meta = with lib; {

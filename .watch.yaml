@@ -3,33 +3,13 @@
 #
 # list here all the events and the commands that it should execute
 
-- name: build project
-  run: 
-    - cargo build
-  change: 
-    - Cargo.toml
-    - build.rs
-    - src/**
-    - tests/**
-  run_on_init: true
-
-- name: quick checks
-  run: 
-    - make fmt
-    - make test
+- name: quick checks @ci
+  run: make check-ci
   change: 
     - Cargo.toml
     - src/**
     - tests/**
   run_on_init: true
-
-- name: lint & formatters
-  run: 
-    - cargo fmt
-  change: 
-    - Cargo.toml
-    - src/**
-    - tests/**
 
 - name: nix flake 
   run: 

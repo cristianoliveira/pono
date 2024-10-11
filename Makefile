@@ -43,3 +43,9 @@ nix-build: ## Run a nix build. Used for development and CI.
 .PHONY: nix-release
 nix-release: ## Generate new hash for nix package based on the latest version.
 	scripts/bump-nix
+
+.PHONY: check-ci
+check-ci: ## 
+	cat .github/workflows/on-push.yml \
+	| yq '.jobs.[].steps.[].run | select(. != null)' \
+	| xargs -I {} bash -c {}

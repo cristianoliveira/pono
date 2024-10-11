@@ -14,5 +14,7 @@ pkgs.mkShell {
     ## Dev deps
     cpkgs.funzzy
     pkgs.gnused
+
+    pkgs.yq-go
   ];
 }
