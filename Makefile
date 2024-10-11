@@ -46,6 +46,6 @@ nix-release: ## Generate new hash for nix package based on the latest version.
 
 .PHONY: check-ci
 check-ci: ## 
-	cat .github/workflows/on-push.yml \
-	| yq '.jobs.[].steps.[].run | select(. != null)' \
-	| xargs -I {} bash -c {}
+	@cat .github/workflows/on-push.yml \
+		| yq '.jobs.[].steps.[].run | select(. != null)' \
+		| xargs -I {} sh -c {}
