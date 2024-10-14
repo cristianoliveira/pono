@@ -1,16 +1,16 @@
 { lib , rustPlatform , fetchFromGitHub , stdenv , darwin }:
 rustPlatform.buildRustPackage rec {
   pname = "pono";
-  version = "develop";
+  version = "main";
 
   src = fetchFromGitHub {
     owner = "cristianoliveira";
     repo = "pono";
     rev = "${version}";
-    hash = "sha256-FhXSUc5XKrworPmBejPtPHi9/EYhzi4ZtMeWBOf27h8=";
+    hash = "sha256-5PyiJ/n9n3CvDMOd7OVv1KK9uwWLLTnx9TfDzEDboX4=";
   };
 
-  cargoHash = "sha256-w41aMIMdlCoOVGfVfx0p7RPSP5URx39F95cB2H4cUjA=";
+  cargoHash = "sha256-RhrzKeLn5R68zQAYteGQF4hg4eqBNbF+Z9du39dZSfc=";
 
   buildInputs = lib.optionals stdenv.isDarwin [
     darwin.apple_sdk.frameworks.CoreServices
