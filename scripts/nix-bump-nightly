@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-VERSION="master"
+VERSION="develop"
 NIX_FILE="nix/pono-develop.nix"
 
 echo "Bumping version to $VERSION"
