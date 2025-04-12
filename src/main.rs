@@ -27,6 +27,11 @@ macro_rules! println_color {
     };
 }
 
+#[derive(Debug, Deserialize)]
+struct Hooks {
+    pre_enable: Option<String>,
+}
+
 /// pono - pack and organize symlinks once
 #[derive(Parser, Debug)]
 #[command(version, about, long_about = None, arg_required_else_help(true))]
@@ -38,6 +43,13 @@ struct Args {
     /// Optional config file path (default: pono.toml)
     #[clap(short, long, value_hint = ValueHint::FilePath)]
     config: Option<String>,
+}
+
+#[derive(Debug, Deserialize)]
+struct PonoDefinition {
+    source: String,
+    target: String,
+    hooks: Option<Hooks>,
 }
 
 #[derive(Subcommand, Debug)]
@@ -79,12 +91,6 @@ enum Commands {
 #[derive(Debug, Deserialize)]
 struct Configuration {
     ponos: HashMap<String, PonoDefinition>,
-}
-
-#[derive(Debug, Deserialize)]
-struct PonoDefinition {
-    source: String,
-    target: String,
 }
 
 fn suggest_ponos() -> Vec<PossibleValue> {
@@ -148,6 +154,19 @@ fn main() {
                 );
                 let src_path = path(&pono_definition.source);
                 let target_path = path(&pono_definition.target);
+
+                if let Some(hooks) = &pono_definition.hooks {
+                    if let Some(pre_enable_hook) = &hooks.pre_enable {
+                        if let Err(err) = std::process::Command::new("sh")
+                            .arg("-c")
+                            .arg(pre_enable_hook)
+                            .status()
+                        {
+                            println_color!(RED, "Failed to execute pre-install hook: {}", err);
+                            std::process::exit(1);
+                        }
+                    }
+                }
 
                 match symlink(&src_path, &target_path) {
                     Ok(_) => {

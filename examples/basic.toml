@@ -2,3 +2,7 @@
 nvim = { source = "./examples/from/nvim", target = "./examples/to/nvim" }
 zsh = { source = "./examples/from/zshrc", target = "./examples/to/.zshrc" }
 other = { source = "./examples/from/other", target = "./examples/to/.other" }
+[ponos."with-hooks"]
+source = "./examples/from/hooks"
+target = "./examples/to/.hooks"
+hooks = { pre_enable = "echo 'Running pre-enable hook for other'" }

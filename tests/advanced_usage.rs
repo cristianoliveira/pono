@@ -36,6 +36,61 @@ fn it_allows_using_environment_variables() -> Result<(), Box<dyn std::error::Err
 }
 
 #[test]
+fn it_executes_pre_enable_hook_for_pre_commit() -> Result<(), Box<dyn std::error::Error>> {
+    let mut cmd = Command::cargo_bin(BINARY_NAME)?;
+
+    cmd.arg("-c")
+        .arg("examples/basic.toml")
+        .arg("enable")
+        .arg("with-hooks");
+
+    cmd.assert().success().stdout(predicate::str::contains(
+        "Running pre-enable hook for other",
+    ));
+
+    let mut cmd = Command::cargo_bin(BINARY_NAME)?;
+
+    cmd.arg("-c")
+        .arg("examples/basic.toml")
+        .arg("disable")
+        .arg("with-hooks");
+
+    cmd.assert()
+        .success()
+        .stdout(predicate::str::contains("Unlinked pono: with-hooks"));
+
+    // common::cleanup();
+
+    Ok(())
+}
+
+// #[test]
+fn it_executes_pre_enable_hook_for_pre_push() -> Result<(), Box<dyn std::error::Error>> {
+    common::cleanup();
+    let mut cmd = Command::cargo_bin(BINARY_NAME)?;
+
+    // cmd.arg("-c")
+    //     .arg("pono.toml")
+    //     .arg("enable")
+    //     .arg("git:pre-push");
+    //
+    // cmd.assert().success().stdout(predicate::str::contains(
+    //     "Running pre-enable hook for pre-push",
+    // ));
+
+    cmd.arg("-c")
+        .arg("pono.toml")
+        .arg("disable")
+        .arg("git:pre-push");
+
+    cmd.assert().success().stdout(predicate::str::contains(
+        "Running pre-enable hook for pre-push",
+    ));
+
+    Ok(())
+}
+
+#[test]
 #[cfg(feature = "test-all")] // use: `make tests`
 fn it_allows_using_tilda_to_express_homedir() -> Result<(), Box<dyn std::error::Error>> {
     common::cleanup();
