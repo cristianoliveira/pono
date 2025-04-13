@@ -30,6 +30,7 @@ macro_rules! println_color {
 #[derive(Debug, Deserialize)]
 struct Hooks {
     pre_enable: Option<String>,
+    pre_disable: Option<String>,
 }
 
 /// pono - pack and organize symlinks once
@@ -162,7 +163,7 @@ fn main() {
                             .arg(pre_enable_hook)
                             .status()
                         {
-                            println_color!(RED, "Failed to execute pre-install hook: {}", err);
+                            println_color!(RED, "Failed to execute pre-enable hook: {}", err);
                             std::process::exit(1);
                         }
                     }
@@ -189,6 +190,18 @@ fn main() {
             for pkg_name in ponos_to_manipulate(&config, &ponos) {
                 let pono_definition = config.ponos.get(&pkg_name).unwrap();
                 let target_path = path(&pono_definition.target);
+                if let Some(hooks) = &pono_definition.hooks {
+                    if let Some(pre_disable_hook) = &hooks.pre_disable {
+                        if let Err(err) = std::process::Command::new("sh")
+                            .arg("-c")
+                            .arg(pre_disable_hook)
+                            .status()
+                        {
+                            println_color!(RED, "Failed to execute pre-disable hook: {}", err);
+                            std::process::exit(1);
+                        }
+                    }
+                }
                 match std::fs::remove_file(&target_path) {
                     Ok(_) => println!("Unlinked pono: {}", pkg_name),
                     Err(err) => {
