@@ -40,8 +40,8 @@ Linking packages
 ls -la examples/to                                                                                                                                                     [1:00:35]
 total 0
 ..
-lrwxr-xr-x 1 cris  58 Sep 14 01:00 .zshrc -> /home/cris/pono/./examples/src/zshrc
-lrwxr-xr-x 1 cris  57 Sep 14 01:00 nvim -> /home/cris/pono/./examples/src/nvim
+lrwxr-xr-x 1 cris  58 Sep 14 01:00 .zshrc -> /home/cris/pono/examples/src/zshrc
+lrwxr-xr-x 1 cris  57 Sep 14 01:00 nvim -> /home/cris/pono/examples/src/nvim
 ```
 
 ## Features
@@ -64,6 +64,7 @@ lrwxr-xr-x 1 cris  57 Sep 14 01:00 nvim -> /home/cris/pono/./examples/src/nvim
 - [Configuration](#configuration)
 - [Examples](#examples)
 - [License](#license)
+- [Documentation](#documentation)
 
 ## Installation
 
@@ -197,6 +198,12 @@ target = "/opt/tools"
 
 - **source**: The directory containing the files to be linked.
 - **target**: The directory where the symlinks should be created.
+
+## Documentation
+
+Here are some additional resources to help you get started or advanced usage:
+
+ - [hooks](docs/HOOKS.md): Define hooks to run commands upon events like enabling or disabling a pono.
 
 ## Contributing
 
